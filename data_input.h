@@ -1,10 +1,10 @@
 #pragma once
 /**
-* 该文件用于输入Petri网的相关信息
-* 包括：初始标识、时延、目标标识、关联矩阵
-* 以及相关的输出信息
-* 含有Infor信息、可达图、数据集
-*/
+ * 该文件用于输入Petri网的相关信息
+ * 包括：初始标识、时延、目标标识、关联矩阵
+ * 以及相关的输出信息
+ * 含有Infor信息、可达图、数据集
+ */
 
 constexpr auto M0_path = "data/lj/111/m0.txt";
 constexpr auto GoalMarking = "data/lj/111/GoalMarking.txt";
