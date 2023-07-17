@@ -19,6 +19,8 @@ using std::vector;
 using std::string;
 using std::unordered_set;
 
+static const vector<int> index = { 111, 112, 121 };  // 指定待融合数据集文件
+
 /** 数据去重 */
 unordered_set<string> Deduplication(const string folder_path) 
 {
@@ -27,7 +29,6 @@ unordered_set<string> Deduplication(const string folder_path)
 	unsigned int pos = 0;   // 当前数据索引
 	unsigned int diff = 0;  // 异同的数据量
 	unsigned int same = 0;  // 相同的数据量
-	vector<int> index = {111, 112, 121};  // 指定待融合数据集文件
 
 	for(auto it  = index.begin(); it != index.end(); ++it)
 	{
