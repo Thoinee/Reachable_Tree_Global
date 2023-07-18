@@ -104,9 +104,9 @@ public:
 			if (goal_[i] != 0)
 				goal_node_->state_.emplace_back(Place(goal_[i], i, 0));
 		}
-		open_list.push(root_);
+		open_list_.push(root_);
 		std::list<ptrNode> temp = { root_ };
-		entire_list.emplace(root_->to_string(), std::move(temp));  // move移动资源，原地址存放的资源不存在
+		entire_list_.emplace(root_->to_string(), std::move(temp));  // move移动资源，原地址存放的资源不存在
 		return;
 	}
 
@@ -180,8 +180,8 @@ public:
 		{
 			list<ptrNode> temp;
 			temp.push_back(newnode);
-			entire_list.emplace(str, std::move(temp));
-			open_list.push(newnode);
+			entire_list_.emplace(str, std::move(temp));
+			open_list_.push(newnode);
 			newnode->is_open_ = true;
 		}
 		else
@@ -195,7 +195,7 @@ public:
 			/* 是新节点，放入open_list和entire_list */
 			else {
 				pair.second->emplace_back(newnode);
-				open_list.push(newnode);
+				open_list_.push(newnode);
 				newnode->is_open_ = true;
 			}
 		}
@@ -230,9 +230,9 @@ public:
 	/* 新旧节点判断 */
  	std::pair<bool, list<ptrNode>*> IsNewNode(ptrNode newnode) {
 		auto str = newnode->to_string();
-		if (entire_list.count(str) <= 0)
+		if (entire_list_.count(str) <= 0)
 			return std::make_pair(1, nullptr);
-		auto it = entire_list.find(str);
+		auto it = entire_list_.find(str);
 		for (auto itor = it->second.begin(); itor != it->second.end();) {
 			auto oldnode = *itor;
 			/* 若旧节点比当前节点新，则当前节点一定是旧节点；反之，当前节点为新节点 */
@@ -268,9 +268,9 @@ public:
 	void ForwardTree() {
 		std::cout << "\nBegin forward tree -> ";
 		clock_t start = clock();
-		while (!open_list.empty()) {
-			auto curnode = open_list.top();
-			open_list.pop();
+		while (!open_list_.empty()) {
+			auto curnode = open_list_.top();
+			open_list_.pop();
 			if (curnode->discarded_)
 				continue;
 			auto enables = EnableTrans(curnode);

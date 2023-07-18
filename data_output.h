@@ -36,7 +36,7 @@ void GlobalGraphCreate(PetriNet& tree) {
 			 << " [color=red style=filled]" 
 			 << "\n";
 	}
-	for (auto& nodes : tree.entire_list) {
+	for (auto& nodes : tree.entire_list_) {
 		for (auto& node : nodes.second) {
 			if (node->h_ < 9999) {
 				if (tree.deadlock_nodes_.count(node->id_) > 0) {
@@ -88,7 +88,7 @@ void GlobalGraphCreate(PetriNet& tree) {
 				 << " [label=t" << std::get<0>(father) << "]\n";
 		}
 	}
-	for (auto& nodes : tree.entire_list) {
+	for (auto& nodes : tree.entire_list_) {
 		for (auto& node : nodes.second) {
 			if (node->h_ < 9999) {
 				for (auto& father : node->fathers) {
@@ -215,7 +215,7 @@ void DataCreate(PetriNet& tree, const int num_place) {
 		}
 		file << node->h_;
 	}
-	for (auto nodes : tree.entire_list) {
+	for (auto nodes : tree.entire_list_) {
 		for (auto node : nodes.second) {
 			if (node->h_ > 99999)
 				continue;
