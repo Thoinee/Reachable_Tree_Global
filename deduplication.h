@@ -19,7 +19,7 @@ using std::vector;
 using std::string;
 using std::unordered_set;
 
-static const vector<int> index = { 111, 112, 121 };  // 指定待融合数据集文件
+static const vector<int> index = { 333, 334, 343, 433 };  // 指定待融合数据集文件
 
 /** 数据去重 */
 unordered_set<string> Deduplication(const string folder_path) 
@@ -63,7 +63,7 @@ unordered_set<string> Deduplication(const string folder_path)
 	}
 	
 	std::cout << "Total：" << pos << "\n";
-	std::cout << "Differener：" << diff << "\n";
+	std::cout << "Different：" << diff << "\n";
 	std::cout << "Same：" << same << std::endl;
 
 	return data_lib;
