@@ -1,14 +1,15 @@
 #pragma once
-/**
- * 该文件用于输入Petri网的相关信息
- * 包括：初始标识、时延、目标标识、关联矩阵
- * 以及相关的输出信息
- * 含有Infor信息、可达图、数据集
- */
+
+/*******************************************************
+* @File name：REACHABLE_TREE_DATA_INPUT_H_
+* @Funciton ：Input basic information of timed Petri Net
+* @Content  ：m0, delay, goal, C+, C-
+* @Update   ：2023/07/18 11:30
+*******************************************************/
 
 constexpr auto M0_path = "data/lj/111/m0.txt";
 constexpr auto GoalMarking = "data/lj/111/GoalMarking.txt";
-constexpr auto Info_path = "data/lj/111/infor_.txt";
+constexpr auto Info_path = "data/lj/111/Info.txt";   
 constexpr auto output_path_py = "data/lj/111/Dataset_111.txt";
 constexpr auto output_path_gv = "data/lj/111/Reachable_Graph_111.gv";
 /* 无需更改 */
@@ -17,21 +18,14 @@ constexpr auto Post_path = "data/lj/111/post.txt";
 constexpr auto Time_path = "data/lj/111/delay.txt";
 constexpr auto GoalPlace = "data/lj/111/GoalPlace.txt";
 
-//constexpr auto Module_path = "D:\\SecretFiLe\\Net\\Module.pt";
-//constexpr auto output_path2 = ".\\Reachable_tree\\data\\lj\\111\\output2.txt";
-//constexpr auto Goal_path = ".\\data\\lj\\111\\m_target.txt";
-//constexpr auto Optimal_path = ".\\data\\lj\\211\\optimal.txt";
-//constexpr auto Model_path = ".\\model\\latest_model.pt";
-//constexpr auto model_path = ".\\data\\sijia\\gpu_model.pt";
-
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
 
 using std::vector;
-template<class T>
-/* 读取标识、延时向量 */
+template<class T> 
+/* 读取初始标识、延时 */
 vector<T> ReadVector(const char* path) {
 	T num;
 	vector<T> result;

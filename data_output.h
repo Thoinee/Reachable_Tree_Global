@@ -1,12 +1,20 @@
 #pragma once
-#include "petri_net.h"
-#include "data_input.h"
+
+/*******************************************************
+* @File name：REACHABLE_TREE_DATA_OUTPUT_H_
+* @Funciton ：Generate datasets and graph
+* @Content  ：dataset, reachable graph
+* @Update   ：2023/07/18 11:30
+*******************************************************/
+
 #include <iostream>
 #include <fstream>
 #include <unordered_set>
 #include <string>
 #include <queue>
 #include <unordered_set>
+#include "petri_net.h"
+#include "data_input.h"
 
 /* 无需用到的标识库所和已等待时间库所 */
 static std::unordered_set<int> ignore_m = { 12,18,34 };

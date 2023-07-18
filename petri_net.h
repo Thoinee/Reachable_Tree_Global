@@ -1,4 +1,14 @@
 #pragma once
+
+/*******************************************************
+* @File name：REACHABLE_TREE_PETRI_NET_H_
+* @Funciton ：Create class PetriNet
+* @Content  ：<1> Implete the operation rules of Timed
+*                 Petri Net
+*             <2> Introduce new and old node judgment
+* @Update   ：2023/07/18 11:30
+*******************************************************/
+
 #include <queue>
 #include <map>
 #include <string>
@@ -24,23 +34,38 @@ public:
 
 class PetriNet :public ThreadPool {
 public:
+	/* 库所个数 */
 	int num_place_;
+	/* 变迁个数 */
 	int num_transition_;
+	/* 节点池 */
 	NodePool pool_;
+	/* 根节点 */
 	ptrNode root_;
+	/* 目标节点 */
 	ptrNode goal_node_;
-	vector<vector<int>> Tpre_;   // 转置pre
-	vector<vector<int>> Tpost_;  // 转置post
-	vector<vector<int>> C;       // 关联矩阵C的转置
+	/* 前置矩阵转置 */
+	vector<vector<int>> Tpre_;
+	/* 后置矩阵转置 */
+	vector<vector<int>> Tpost_;
+	/* 关联矩阵转置 */
+	vector<vector<int>> C;
+	/* 初始标识 */
 	vector<int> m0_;
-	vector<int> num_input_places_;
+	/* 延时 */
 	vector<int> delay_;
+	/* 目标标识 */
 	vector<int> goal_;
+	/* 存储目标节点 */
 	vector<ptrNode> goal_nodes_;
+	/* 存储死锁节点 */
 	std::unordered_map<unsigned, ptrNode> deadlock_nodes_;
+	/* 存储叶子节点 */
 	std::unordered_map<unsigned, ptrNode> leaf_nodes_;
-	std::priority_queue<ptrNode, vector<ptrNode>, open_cmp> open_list;
-	std::map<string, list<ptrNode>> entire_list;   // 存储标识相同的节点
+	/* 存储新节点 open表 */
+	std::priority_queue<ptrNode, vector<ptrNode>, open_cmp> open_list_;
+	/* 存储扩展过的节点 close + open表 */
+	std::map<string, list<ptrNode>> entire_list_;
 
 	/* 初始化参数 */
 	PetriNet(vector<int>& m, vector<int >& d, vector<vector<int>>& p, vector<vector<int>>& q, vector<int>& goal, unsigned int num_threads = 1) :
@@ -178,13 +203,23 @@ public:
 
 	/* g, v 比较 判断是否为旧节点 */
 	bool IsOld(ptrNode& newnode, ptrNode& oldnode) {
+
+		/** v、g 先后判断 */
 		//if (newnode->g_ > oldnode->g_)
 		//	return false;
 		//for (int i = 0; i < newnode->state_.size(); ++i)
 		//	if (newnode->state_[i].v_ < oldnode->state_[i].v_)
 		//		return false;
 		//return true;
-		 /* 新 */ 
+
+		/** 法一：传统判断 */
+		//for (int i = 0; i < newnode->state_.size(); ++i) {
+		//	if (newnode->state_[i].v_ != oldnode->state_[i].v_)
+		//		return false;
+		//}
+		//return true;
+
+		/** 法二：时间轴判断 */ 
 		for (int i = 0; i < newnode->state_.size(); ++i) {
 			if (newnode->g_ - newnode->state_[i].v_ < oldnode->g_ - oldnode->state_[i].v_)
 				return false;
@@ -282,7 +317,7 @@ public:
 	/* 叶子节点处理*/
 	void LeafNodeDeal() {
 		for (auto &obj : leaf_nodes_) {
-			auto node = obj.second;
+			auto node = obj.second; 
 			node->h_ = root_->h_ * 1.5;
 			if (node->fathers.empty()) {
 				continue;

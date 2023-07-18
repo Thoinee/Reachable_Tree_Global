@@ -1,4 +1,16 @@
 #pragma once
+
+/*******************************************************
+* @File name：REACHABLE_TREE_NODE_H_
+* @Funciton ：Create class Node, Place, NodePool
+* @Content  ：<1> Store the status of a single place
+*             <2> Vector state_ only stores the status
+*                 of places with a token
+*             <3> Create storage space for nodes in advance
+*                 API: fetch nodes and recycle nodes
+* @Update   ：2023/07/18 11:30
+*******************************************************/
+
 #include <vector>
 #include <memory>
 #include <tuple>
@@ -8,6 +20,7 @@
 
 using std::vector;
 using std::shared_ptr;
+
 class Node;
 class NodePool;
 
@@ -38,16 +51,27 @@ private:
 /* 节点类 */
 class Node {
 public:
+	/* 记录当前取出来的节点标号 */
 	static unsigned int num;
+	/* 是否抛弃 */
 	bool discarded_;
+	/* 是否死锁 */
 	bool is_deadlock_;
+	/* 是否在open表中 */
 	bool is_open_;
+	/* 初始->当前的代价 */
 	unsigned short g_;
+	/* 当前->终点的代价 */
 	float h_;
+	/* 子节点个数 */
 	short sons_;
+	/* 节点标号 */
 	unsigned int id_;
+	/* 节点池 */
 	NodePool* pool_;
-	std::vector<std::tuple<unsigned short, unsigned int, unsigned int, ptrNode >> fathers; //父节点 （激发变迁、id、cost 父结点指针）
+	/* 父节点（激发变迁、id、激发所需代价、父节点指针） */
+	std::vector<std::tuple<unsigned short, unsigned int, unsigned int, ptrNode >> fathers;
+	/* 标识（只含有token的place） */
 	vector<Place> state_;
 	Node(NodePool* pool) :discarded_(false), is_deadlock_(false), is_open_(false), g_(0), sons_(0), h_(FLT_MAX), id_(Node::num), pool_(pool) { ++Node::num; }
 
@@ -153,6 +177,3 @@ public:
 private:
 	Node() = delete;
 };
-
-
-
