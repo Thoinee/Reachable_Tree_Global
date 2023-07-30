@@ -7,11 +7,11 @@
 * @Update   ：2023/07/18 11:30
 *******************************************************/
 
-constexpr auto M0_path = "data/lj/111/m0.txt";
-constexpr auto GoalMarking = "data/lj/111/GoalMarking.txt";
-constexpr auto Info_path = "data/lj/111/Info.txt";   
-constexpr auto output_path_py = "data/lj/111/Dataset_111.txt";
-constexpr auto output_path_gv = "data/lj/111/Reachable_Graph_111.gv";
+constexpr auto M0_path = "data/lj/231/m0.txt";
+constexpr auto GoalMarking = "data/lj/231/GoalMarking.txt";
+constexpr auto Info_path = "data/lj/231/Info.txt";   
+constexpr auto output_path_py = "data/lj/231/Dataset_231.txt";
+constexpr auto output_path_gv = "data/lj/231/Reachable_Graph_231.gv";
 /* 无需更改 */
 constexpr auto Pre_path = "data/lj/111/pre.txt";
 constexpr auto Post_path = "data/lj/111/post.txt";
@@ -20,7 +20,7 @@ constexpr auto GoalPlace = "data/lj/111/GoalPlace.txt";
 
 #include <iostream>
 #include <fstream>
-#include <vector>
+#include <vector> 
 #include <string>
 
 using std::vector;

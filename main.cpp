@@ -28,8 +28,7 @@ int main(void)
 	PetriNet petri(m0, d0, pre, post, goal_vector, 1);
 	petri.ForwardTree();
 	petri.BackTree();
-	petri.LeafNodeDeal();
-	//petri.DeadLockNodeDeal();
+	petri.DeadLockNodeDeal();
 
 	/* –≈œ¢¥Ú”° */
 	std::thread t1(GlobalGraphCreate, std::ref(petri));

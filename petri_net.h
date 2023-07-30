@@ -64,6 +64,7 @@ public:
 	std::unordered_map<unsigned, ptrNode> leaf_nodes_;
 	/* 存储新节点 open表 */
 	std::priority_queue<ptrNode, vector<ptrNode>, open_cmp> open_list_;
+	//std::queue<ptrNode> open_list_;
 	/* 存储扩展过的节点 close + open表 */
 	std::map<string, list<ptrNode>> entire_list_;
 
@@ -284,8 +285,8 @@ public:
 			}
 		}
 		clock_t end = clock();
-		auto programTimes = (end - start) / 1000;
-		std::cout << "Forward tree finish（" << programTimes << "s）->";
+		auto programTimes = end - start;
+		std::cout << "Forward tree finish（" << programTimes << "ms）->";
 	}
 
 	/* 反向树 */
@@ -310,8 +311,8 @@ public:
 			}
 		}
 		clock_t end = clock();
-		auto programTimes = (end - start) / 1000;
-		std::cout << "Back tree finish（" << programTimes << "s）" << std::endl;
+		auto programTimes = end - start;
+		std::cout << "Back tree finish（" << programTimes << "ms）" << std::endl;
 	}
 
 	/* 叶子节点处理*/
@@ -337,7 +338,7 @@ public:
 	void DeadLockNodeDeal() {
 		for (auto &obj : deadlock_nodes_) {
 			auto node = obj.second;
-			node->h_ = root_->h_ * 2;
+			node->h_ = root_->h_ * 1.2;
 			if (node->fathers.empty()) {
 				continue; 
 			}
