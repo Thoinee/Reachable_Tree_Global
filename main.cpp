@@ -13,7 +13,7 @@
 #include "data_output.h"
 
 
-int main(void)
+int main(int argc, char* argv[])
 {
 	/* 读数据 */
 	std::vector<int> m0 = ReadVector<int>(M0_path);
@@ -28,12 +28,14 @@ int main(void)
 	PetriNet petri(m0, d0, pre, post, goal_vector, 1);
 	petri.ForwardTree();
 	petri.BackTree();
-	petri.DeadLockNodeDeal();
+	//petri.DeadLockNodeDeal();
 
 	/* 信息打印 */
-	std::thread t1(GlobalGraphCreate, std::ref(petri));
+	//std::thread t1(GlobalGraphCreate, std::ref(petri));
 	std::thread t2(DataCreate, std::ref(petri), m0.size());
-	t1.join();
+	//t1.join();
 	t2.join();
 	InfoCreate(petri);
+
+	return 0;
 }

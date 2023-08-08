@@ -64,7 +64,6 @@ public:
 	std::unordered_map<unsigned, ptrNode> leaf_nodes_;
 	/* 存储新节点 open表 */
 	std::priority_queue<ptrNode, vector<ptrNode>, open_cmp> open_list_;
-	//std::queue<ptrNode> open_list_;
 	/* 存储扩展过的节点 close + open表 */
 	std::map<string, list<ptrNode>> entire_list_;
 
@@ -202,25 +201,29 @@ public:
 		}
 	}
 
-	/* g, v 比较 判断是否为旧节点 */
+	/* 传统判断(是否为旧节点) */
+	bool IsSame(ptrNode& newnode, ptrNode& oldnode) {
+		for (int i = 0; i < newnode->state_.size(); ++i) {
+			if (newnode->state_[i].v_ != oldnode->state_[i].v_)
+				return false;
+		}
+		return true;
+	}
+
+	/* 先 g 后 v 进行判断(是否为新节点) */
+	bool IsNew(ptrNode& newnode, ptrNode& oldnode) {
+		if (newnode->g_ > oldnode->g_) {
+			return false;
+		}
+		for (int i = 0; i < newnode->state_.size(); ++i) {
+			if (newnode->state_[i].v_ < oldnode->state_[i].v_)
+				return false;
+		}
+		return true;
+	}
+
+	/* 时间轴判断(是否为旧节点) */
 	bool IsOld(ptrNode& newnode, ptrNode& oldnode) {
-
-		/** v、g 先后判断 */
-		//if (newnode->g_ > oldnode->g_)
-		//	return false;
-		//for (int i = 0; i < newnode->state_.size(); ++i)
-		//	if (newnode->state_[i].v_ < oldnode->state_[i].v_)
-		//		return false;
-		//return true;
-
-		/** 法一：传统判断 */
-		//for (int i = 0; i < newnode->state_.size(); ++i) {
-		//	if (newnode->state_[i].v_ != oldnode->state_[i].v_)
-		//		return false;
-		//}
-		//return true;
-
-		/** 法二：时间轴判断 */ 
 		for (int i = 0; i < newnode->state_.size(); ++i) {
 			if (newnode->g_ - newnode->state_[i].v_ < oldnode->g_ - oldnode->state_[i].v_)
 				return false;
@@ -236,7 +239,6 @@ public:
 		auto it = entire_list_.find(str);
 		for (auto itor = it->second.begin(); itor != it->second.end();) {
 			auto oldnode = *itor;
-			/* 若旧节点比当前节点新，则当前节点一定是旧节点；反之，当前节点为新节点 */
 			if (IsOld(newnode, oldnode))
 				return std::make_pair(0, &(it->second));
 			if (IsOld(oldnode, newnode)) {
