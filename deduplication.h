@@ -17,13 +17,15 @@ using std::vector;
 using std::string;
 using std::unordered_map;
 
+typedef unordered_map<string, string> mymap;
+
 static const vector<int> dataset = { 111, 112, 113, 121, 122, 123, 131, 132, 133, 211, 212, 213, 221, 222, 223, 231, 232, 233, 311, 312, 313, 321,
 322, 323, 331, 332, 333, 334, 343, 344, 433, 434, 443, 444};  // 指定待融合数据集文件
 
 /** 数据去重 */
-unordered_map<string, string> Deduplication(const string folder_path) 
+unordered_map<string, string>* Deduplication(const string folder_path) 
 {
-	unordered_map<string, string> data;  // 存放数据
+	mymap* data = new mymap;  // 存放数据
 	unsigned int diff = 0;  // 异同的数据量
 	unsigned int same = 0;  // 相同的数据量
 	unsigned int index = 0; // 当前数据索引
@@ -50,16 +52,16 @@ unordered_map<string, string> Deduplication(const string folder_path)
 			string val = data_to_str.substr(pos + 1); // h
 
 			// key值相同 保留h值小的元素
-			if (data.count(key) != 0) {
-				auto h = data.find(key)->second;  // 获取h值
+			if (data->find(key) != data->end()) {
+				auto h = data->find(key)->second;  // 获取h值
 				if (std::stof(val) < std::stof(h)) {
-					data.at(key) = val;
+					data->at(key) = val;
 				}
 				++same;
 				continue;
 			}
 			// 异同
-			data.insert(std::pair<string, string>(key, val));
+			data->insert(std::pair<string, string>(key, val));
 			++diff;
 		}
 		ifs.close();
@@ -73,16 +75,16 @@ unordered_map<string, string> Deduplication(const string folder_path)
 }
 
 /** 去除尾部空格 */
-void ExportFinalData(unordered_map<string, string> lib, const char* path)
+void ExportFinalData(unordered_map<string, string>* lib, const char* path)
 {
 	int pos = 0;  // 当前数据索引
 
 	std::ofstream ofs(path);
 
-	for (auto it : lib){
+	for (auto it : *lib){
 		ofs << it.first << '\t' << it.second;
 		pos++;
-		if (pos < lib.size()) ofs << "\n";
+		if (pos < lib->size()) ofs << "\n";
 	}
 	ofs.close();
 }
