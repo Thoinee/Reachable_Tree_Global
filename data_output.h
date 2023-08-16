@@ -13,6 +13,7 @@
 #include <string>
 #include <queue>
 #include <unordered_set>
+#include <iomanip>
 #include "petri_net.h"
 #include "data_input.h"
 
@@ -149,33 +150,99 @@ void GraphCreate(PetriNet& tree) {
 
 template <typename T>
 /* 转换为数据集格式 */
-vector<T> ToVector(const ptrNode node, const int num_place) {   // 节点指针  PetriNet库所总数
+//vector<T> ToVector(const ptrNode node, const int num_place) {   // 节点指针  PetriNet库所总数
+//	auto places = node->state_;
+//	int j = 0;   // 对已赋值的库所进行计数
+//	std::vector<T> ans;
+//	for (int i = 0; i < num_place; ++i) {   //  遍历所有库所，进行赋值
+//		if (ignore_m.count(i) >= 1)    // 若查到找ignore_m中存储的无用库所，则跳过不赋值
+//			continue;
+//		if (j < places.size()) {       // 计数值未到达需赋值的库所数
+//			if (i < places[j].row_) {  // 将state_中未记录的库所赋予0
+//				ans.push_back(0);
+//			}
+//			else if (i == places[j].row_) {      // 到达state_中包含的place，对token数进行赋值
+//				ans.push_back(places[j].tokens_);
+//				++j;                             // 计数值+1
+//			}
+//			else {                    // 由于上面有continue，会出现无赋值且i自动加1，导致i位置空出；ignore_m中包含库所存在于state_中；
+//				--i;                  // 所以利用--i跳到空位置；++j补上含有的place计数值，否则j无法==含有token的库所数
+//				++j;
+//			}
+//		}
+//		else {                       // 若计数值=含有token的库所数，则剩余的库所全置0
+//			ans.push_back(0);
+//		}
+//	}
+//	j = 0;
+//
+//	/* 与上述同理 */
+//	for (int i = 0; i < num_place; ++i) {
+//		if (ignore_v.count(i) >= 1)
+//			continue;
+//		if (j < places.size()) {
+//			if (i < places[j].row_) {
+//				ans.push_back(0);
+//			}
+//			else if (i == places[j].row_) {
+//				ans.push_back(places[j].v_);
+//				++j;
+//			}
+//			else {
+//				--i;
+//				++j;
+//			}
+//		}
+//		else {
+//			ans.push_back(0);
+//		}
+//	}
+//	return ans;
+//}
+
+std::pair<vector<T>, vector<T>> ToVector(const ptrNode node, const int num_place) {   // 节点指针  PetriNet库所总数
 	auto places = node->state_;
 	int j = 0;   // 对已赋值的库所进行计数
-	std::vector<T> ans;
+	std::vector<T> ans_m, ans_x;
 	for (int i = 0; i < num_place; ++i) {   //  遍历所有库所，进行赋值
-		if (ignore_m.count(i) >= 1)    // 若查到找ignore_m中存储的无用库所，则跳过不赋值
-			continue;
 		if (j < places.size()) {       // 计数值未到达需赋值的库所数
 			if (i < places[j].row_) {  // 将state_中未记录的库所赋予0
-				ans.push_back(0);
+				ans_m.push_back(0);
 			}
 			else if (i == places[j].row_) {      // 到达state_中包含的place，对token数进行赋值
-				ans.push_back(places[j].tokens_);
+				ans_m.push_back(places[j].tokens_);
 				++j;                             // 计数值+1
-			}
-			else {                    // 由于上面有continue，会出现无赋值且i自动加1，导致i位置空出；ignore_m中包含库所存在于state_中；
-				--i;                  // 所以利用--i跳到空位置；++j补上含有的place计数值，否则j无法==含有token的库所数
-				++j;
 			}
 		}
 		else {                       // 若计数值=含有token的库所数，则剩余的库所全置0
-			ans.push_back(0);
+			ans_m.push_back(0);
 		}
 	}
 	j = 0;
 
 	/* 与上述同理 */
+	for (int i = 0; i < num_place; ++i) {
+		if (j < places.size()) {
+			if (i < places[j].row_) {
+				ans_x.push_back(0);
+			}
+			else if (i == places[j].row_) {
+				ans_x.push_back(places[j].v_);
+				++j;
+			}
+		}
+		else {
+			ans_x.push_back(0);
+		}
+	}
+	return std::make_pair(ans_m, ans_x);
+}
+
+/* 已等待时间v / 时延d */
+vector<float> ToStandard(const ptrNode node, const int num_place, const vector<int>& delay) {   // 节点指针  PetriNet库所总数
+	auto places = node->state_;
+	int j = 0;   // 对已赋值的库所进行计数
+	std::vector<float> ans;
 	for (int i = 0; i < num_place; ++i) {
 		if (ignore_v.count(i) >= 1)
 			continue;
@@ -184,7 +251,8 @@ vector<T> ToVector(const ptrNode node, const int num_place) {   // 节点指针  Pet
 				ans.push_back(0);
 			}
 			else if (i == places[j].row_) {
-				ans.push_back(places[j].v_);
+				auto temp = (float)places[j].v_ / delay[i];
+				ans.push_back(temp);
 				++j;
 			}
 			else {
@@ -200,39 +268,146 @@ vector<T> ToVector(const ptrNode node, const int num_place) {   // 节点指针  Pet
 }
 
 /* 生成训练数据集 */
+//void DataCreate(PetriNet& tree, const int num_place) {
+//	std::ofstream file(output_path_py);
+//	/* 保留两位小数格式 */
+//	file << std::setiosflags(std::ios::fixed) << std::setprecision(2);
+//
+//	bool begin = true;
+//	for (auto node : tree.goal_nodes_) {
+//		if (!begin) {
+//			file << '\n';
+//		}
+//		else
+//			begin = false;
+//		auto vec = ToVector<int>(node, num_place, tree.delay_);
+//		auto standard = ToStandard(node, num_place, tree.delay_);
+//		for (auto v : vec) {
+//			file << v << '\t';
+//		}
+//		for (auto s : standard) {
+//			file << s << '\t';
+//		}
+//		file << node->h_;
+//	}
+//	for (auto nodes : tree.entire_list_) {
+//		for (auto node : nodes.second) {
+//			if (node->h_ > 99999)
+//				continue;
+//			if (!begin) {
+//				file << '\n';
+//			}
+//			else
+//				begin = false;
+//			auto vec = ToVector<int>(node, num_place,tree.delay_);
+//			auto standard = ToStandard(node, num_place, tree.delay_);
+//			for (auto v : vec) {
+//				file << v << '\t';
+//			}
+//			for (auto s : standard) {
+//				file << s << '\t';
+//			}
+//			file << node->h_;
+//			total_nodes_num++;
+//		}
+//	}
+//	file.close();
+//}
+
 void DataCreate(PetriNet& tree, const int num_place) {
-	std::ofstream file(output_path_py);
+	std::ofstream file_m(output_m_py);
+	std::ofstream file_x(output_x_py);
+	std::ofstream file_h(output_h_py);
+
 	bool begin = true;
 	for (auto node : tree.goal_nodes_) {
 		if (!begin) {
-			file << '\n';
+			file_m << '\n';
+			file_x << '\n';
+			file_h << '\n';
 		}
 		else
 			begin = false;
-		auto vec = ToVector<int>(node, num_place);
-		for (auto v : vec) {
-			file << v << '\t';
+		
+		auto pair = ToVector<int>(node, num_place);
+		vector<int> m_vec = pair.first;
+		vector<int> x_vec = pair.second;
+
+		bool begin_in = true;
+		for (auto v : m_vec) {
+			if (!begin_in) {
+				file_m << ',';
+			}
+			else {
+				begin_in = false;
+			}
+
+			file_m << v;
 		}
-		file << node->h_;
+
+		begin_in = true;
+		for (auto v : x_vec) {
+			if (!begin_in) {
+				file_x << ',';
+			}
+			else{
+				begin_in = false;
+			}
+
+			file_x << v;
+		}
+
+		file_h << node->h_;
 	}
+
 	for (auto nodes : tree.entire_list_) {
 		for (auto node : nodes.second) {
 			if (node->h_ > 99999)
 				continue;
 			if (!begin) {
-				file << '\n';
+				file_m << '\n';
+				file_x << '\n';
+				file_h << '\n';
 			}
 			else
 				begin = false;
-			auto vec = ToVector<int>(node, num_place);
-			for (auto v : vec) {
-				file << v << '\t';
+
+			auto pair = ToVector<int>(node, num_place);
+			vector<int> m_vec = pair.first;
+			vector<int> x_vec = pair.second;
+
+			bool begin_in = true;
+			for (auto v : m_vec) {
+				if (!begin_in) {
+					file_m << ',';
+				}
+				else {
+					begin_in = false;
+				}
+
+				file_m << v;
 			}
-			file << node->h_;
+
+			begin_in = true;
+			for (auto v : x_vec) {
+				if (!begin_in) {
+					file_x << ',';
+				}
+				else {
+					begin_in = false;
+				}
+
+				file_x << v;
+			}
+
+			file_h << node->h_;
 			total_nodes_num++;
 		}
 	}
-	file.close();
+
+	file_m.close();
+	file_x.close();
+	file_h.close();
 }
 
 /* 信息输出 */
