@@ -1,15 +1,14 @@
 #pragma once
-
 /*******************************************************
-* @File name£ºREACHABLE_TREE_NODE_H_
-* @Funciton £ºCreate class Node, Place, NodePool
-* @Content  £º<1> Store the status of a single place
-*             <2> Vector state_ only stores the status
-*                 of places with a token
-*             <3> Create storage space for nodes in advance
-*                 API: fetch nodes and recycle nodes
-* @Update   £º2023/07/18 11:30
-*******************************************************/
+ * @File name£ºREACHABLE_TREE_NODE_H_
+ * @Funciton £ºCreate class Node, Place, NodePool
+ * @Content  £º<1> Store the status of a single place
+ *             <2> Vector state_ only stores the status
+ *                 of places with a token
+ *             <3> Create storage space for nodes in advance
+ *                 API: fetch nodes and recycle nodes
+ * @Update   £º2023/07/18 11:30
+ ******************************************************/
 
 #include <vector>
 #include <memory>
