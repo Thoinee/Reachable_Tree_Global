@@ -19,7 +19,8 @@ using std::unordered_map;
 
 typedef unordered_map<string, string> mymap;
 
-static const vector<int> dataset = { 111, 112, 121, 122, 211, 212, 221, 222, 223, 232, 233, 322, 323, 332, 333, 334, 343, 344, 433, 434, 443, 444};  // 指定待融合数据集文件
+static const vector<string> dataset = { "001", "010", "011", "100", "101", "110", "111", 
+										"112", "121", "122", "211", "212", "221", "222"};  // 指定待融合数据集文件
 
 //static const vector<int> dataset = { 333 };  // 指定待融合数据集文件
 
@@ -32,7 +33,7 @@ unordered_map<string, string>* Deduplication(const string folder_path)
 	unsigned int index = 0; // 当前数据索引
 
 	for(auto it = dataset.begin(); it != dataset.end(); ++it){
-		string path = folder_path + "\\" + std::to_string(*it) + "\\Dataset.txt";  // 任务文件夹路径
+		string path = folder_path + "\\" + *it + "\\Dataset.txt";  // 任务文件夹路径
 
 		std::ifstream ifs(path);
 
