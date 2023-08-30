@@ -338,12 +338,14 @@ public:
 		std::cout << "Begin back tree -> ";
 		clock_t start = clock();
 		vector<ptrNode> back_node = goal_nodes_;
+
 		for (auto& node_ : deadlock_nodes_) {
 			back_node.insert(back_node.end(), node_.second);
 		}
 		for (auto& node_ : leaf_nodes_) {
 			back_node.insert(back_node.end(), node_.second);
 		}
+
 		while (!back_node.empty()) {
 			auto node = back_node.back();
 			back_node.pop_back();
@@ -358,6 +360,7 @@ public:
 				}
 			}
 		}
+
 		clock_t end = clock();
 		auto programTimes = end - start;
 		std::cout << "Back tree finish（" << programTimes << "ms）\n" << std::endl;
@@ -365,19 +368,23 @@ public:
 
 	/* 死锁节点处理 */
 	void DeadLockNodeDeal() {
+		vector<ptrNode> back_nodes;
+
 		for (auto &obj : deadlock_nodes_) {
 			auto node = obj.second;
 			node->h_ = root_->h_ * 1.2;
-			if (node->fathers.empty()) {
-				continue; 
-			}
-			auto f_node = std::get<3>(node->fathers[0]);
-			while(f_node->h_ > 9999){
-				f_node->h_ = std::get<2>(node->fathers[0]) + node->h_;
-				if (f_node->fathers.empty())
-					break;
-				node = f_node;
-				f_node = std::get<3>(f_node->fathers[0]);
+			back_nodes.push_back(node);
+		}
+
+		while (!back_nodes.empty()) {
+			auto node = back_nodes.back();
+			back_nodes.pop_back();
+			for (auto f : node->fathers) {
+				auto fnode = std::get<3>(f);
+				if (fnode->h_ <= node->h_ + std::get<2>(f))
+					continue;
+				fnode->h_ = node->h_ + std::get<2>(f);
+				back_nodes.push_back(fnode);
 			}
 		}
 	}

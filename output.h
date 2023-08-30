@@ -20,7 +20,7 @@
 static std::unordered_set<int> ignore_m = { 12, 18, 34 }; // 省略目标库所
 static std::unordered_set<int> ignore_v = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17, 18, 33, 34 }; // 省略初始库所、资源库所、目标库所
 
-static float max_accept_multiple = 1.5; // 可容许最大倍数
+static float max_accept_multiple = 2; // 可容许最大倍数
 
 /* 节点计数器 */
 static long tree_nodes_num = 0;  // 状态数
@@ -324,6 +324,8 @@ void DataCreateTxt(PetriNet& tree, const int num_place) {
 
 /* 分开生成csv文件 */
 void DataCreateCsv(PetriNet& tree, const int num_place, const int num_transition) {
+	/* 数据保留阈值 */
+	auto threshold_value = max_accept_multiple * tree.root_->h_;
 	/* m.csv */
 	std::ofstream file_m(kOutputCsvMPath);
 	/* x.csv */
@@ -343,7 +345,8 @@ void DataCreateCsv(PetriNet& tree, const int num_place, const int num_transition
 
 	bool begin = true; // 每条数据之间的换行符
 	for (auto node : total_nodes) {
-		if (node->h_ > 9999) continue;
+		if (node->h_ > 9999 || node->h_ >= threshold_value) 
+			continue;
 		if (!begin) {
 			file_m << '\n';
 			file_x << '\n';
