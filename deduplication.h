@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <memory>
 
 using std::vector;
 using std::string;
@@ -19,17 +20,18 @@ using std::unordered_map;
 
 typedef unordered_map<string, string> Mymap;
 typedef unsigned int Uint;
+typedef std::shared_ptr<Mymap> MymapPtr;
 
 //static const vector<string> dataset = { "001", "010", "011", "100", "101", "110", "111", 
 //										"112", "121", "122", "211", "212", "221", "222",
 //										"223", "232", "233", "322", "323", "332", "333"};  // 指定待融合数据集文件
 
-static const vector<string> dataset = { "122_"/*, "011"*/ };  // 指定待融合数据集文件
+static const vector<string> dataset = { "111_"/*, "011"*/ };  // 指定待融合数据集文件
 
 /** 数据去重 */
-unordered_map<string, string>* Deduplication(const string folder_path) 
+MymapPtr Deduplication(const string folder_path)
 {
-	Mymap* data = new Mymap;  // 存放数据
+	MymapPtr data = std::make_shared<Mymap>();  // 存放数据
 	Uint diff = 0;  // 异同的数据量
 	Uint same = 0;  // 相同的数据量
 	Uint index = 0; // 当前数据索引
@@ -81,7 +83,7 @@ unordered_map<string, string>* Deduplication(const string folder_path)
 }
 
 /** 去除尾部空格 */
-void ExportFinalData(unordered_map<string, string>* lib, const char* path)
+void ExportFinalData(MymapPtr lib, const char* path)
 {
 	int pos = 0;  // 当前数据索引
 
@@ -92,5 +94,6 @@ void ExportFinalData(unordered_map<string, string>* lib, const char* path)
 		pos++;
 		if (pos < lib->size()) ofs << "\n";
 	}
+
 	ofs.close();
 }
