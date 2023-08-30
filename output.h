@@ -1,8 +1,8 @@
 #pragma once
 /*******************************************************
- * @File name：REACHABLE_TREE_DATA_OUTPUT_H_
+ * @File name：REACHABLE_TREE_OUTPUT_H_
  * @Funciton ：Generate datasets and graph
- * @Content  ：dataset, reachable graph
+ * @Content  ：Dataset, Reachable graph
  * @Update   ：2023/07/18 11:30
  ******************************************************/
 
@@ -20,6 +20,8 @@
 static std::unordered_set<int> ignore_m = { 12, 18, 34 }; // 省略目标库所
 static std::unordered_set<int> ignore_v = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17, 18, 33, 34 }; // 省略初始库所、资源库所、目标库所
 
+static float max_accept_multiple = 1.5; // 可容许最大倍数
+
 /* 节点计数器 */
 static long tree_nodes_num = 0;  // 状态数
 static long total_nodes_num = 0; // 数据量
@@ -33,7 +35,7 @@ void GlobalGraphCreate(PetriNet& tree) {
 		file << "\"" 
 			 << "m" << node->id_ 
 			 << "_g" << node->g_ 
-			 << "_h" << node->h_ 
+			 << "_h" << node->h_
 			 << "\"" 
 			 << " [color=red style=filled]" 
 			 << "\n";
@@ -79,13 +81,13 @@ void GlobalGraphCreate(PetriNet& tree) {
 			file << "\"" 
 				 << "m" << f_node->id_ 
 				 << "_g" << f_node->g_ 
-				 << "_h" << f_node->h_ 
+				 << "_h" << f_node->h_
 				 << "\"" 
 				 << " -> " 
 				 << "\"" 
 				 << "m" << node->id_ 
 				 << "_g" << node->g_ 
-				 << "_h" << node->h_ 
+				 << "_h" << node->h_
 				 << "\"" 
 				 << " [label=t" << std::get<0>(father) << "]\n";
 		}
@@ -98,7 +100,7 @@ void GlobalGraphCreate(PetriNet& tree) {
 					file << "\"" 
 						 << "m" << f_node->id_ 
 						 << "_g" << f_node->g_ 
-						 << "_h" << f_node->h_ 
+						 << "_h" << f_node->h_
 						 << "\"" 
 						 << " -> " 
 						 << "\"" 
@@ -226,7 +228,7 @@ vector<T> ToVector(const ptrNode node, const int num_place, const vector<int>& d
 }
 
 template <typename T>
-/* 分开生成csv文件 */
+/* 生成m，x向量 */
 std::pair<vector<T>, vector<T>> ToVector(const ptrNode node, const int num_place) {   // 节点指针  PetriNet库所总数
 	auto places = node->state_;
 	int j = 0;   // 对已赋值的库所进行计数
@@ -266,8 +268,21 @@ std::pair<vector<T>, vector<T>> ToVector(const ptrNode node, const int num_place
 	return std::make_pair(ans_m, ans_x);
 }
 
+/* 生成Q向量 */
+vector<float> QToVector(const ptrNode node, const int num_transition) {
+	vector<float> ans(num_transition, 1);
+	auto it = node->Q_;
+	for (auto q : it) {
+		ans[q.first] = -q.second;
+	}
+	return ans;
+}
+
 /* 生成训练数据集 */
 void DataCreateTxt(PetriNet& tree, const int num_place) {
+	/* 数据保留阈值 */
+	auto threshold_value = max_accept_multiple * tree.root_->h_;
+	/* 数据集输出流 */
 	std::ofstream file(kOutputTxtPath);
 	/* 保留两位小数格式 */
 	file << std::setiosflags(std::ios::fixed) << std::setprecision(2);
@@ -285,9 +300,10 @@ void DataCreateTxt(PetriNet& tree, const int num_place) {
 		}
 		file << node->h_;
 	}
+
 	for (auto nodes : tree.entire_list_) {
 		for (auto node : nodes.second) {
-			if (node->h_ > 9999)
+			if (node->h_ > 9999 || node->g_ + node->h_ >= threshold_value)
 				continue;
 			if (!begin) {
 				file << '\n';
@@ -302,37 +318,45 @@ void DataCreateTxt(PetriNet& tree, const int num_place) {
 			total_nodes_num++;
 		}
 	}
+
 	file.close();
 }
 
-void DataCreateCsv(PetriNet& tree, const int num_place) {
+/* 分开生成csv文件 */
+void DataCreateCsv(PetriNet& tree, const int num_place, const int num_transition) {
 	/* m.csv */
 	std::ofstream file_m(kOutputCsvMPath);
 	/* x.csv */
 	std::ofstream file_x(kOutputCsvXPath);
 	/* h.csv */
 	std::ofstream file_h(kOutputCsvHPath);
+	/* Q.csv */
+	std::ofstream file_Q(kOutputCsvQPath);
 	/* 所有节点 */
 	vector<ptrNode> total_nodes;
+
+	/* 存入待反向的节点 */
 	total_nodes.insert(total_nodes.end(), tree.goal_nodes_.begin(), tree.goal_nodes_.end()); // 目标节点
-	for (auto nodes : tree.entire_list_) {  // 路径节点
-		total_nodes.insert(total_nodes.end(), nodes.second.begin(), nodes.second.end());
+	for (auto nodes : tree.entire_list_) {
+		total_nodes.insert(total_nodes.end(), nodes.second.begin(), nodes.second.end()); // 路径节点
 	}
 
-	bool begin = true;
+	bool begin = true; // 每条数据之间的换行符
 	for (auto node : total_nodes) {
 		if (node->h_ > 9999) continue;
 		if (!begin) {
 			file_m << '\n';
 			file_x << '\n';
 			file_h << '\n';
+			file_Q << '\n';
 		}
 		else begin = false;
 
-		auto pair = ToVector<int>(node, num_place);
+		auto pair = ToVector<int>(node, num_place);  // (m, x)
+		auto Q_value = QToVector(node, num_transition);  // (Q_index, Q_value)
 
 		/* 存入m */
-		bool begin_in = true;
+		bool begin_in = true; // 数据项之间的分隔符
 		for (auto v : pair.first) {
 			if (!begin_in) {
 				file_m << ',';
@@ -351,6 +375,15 @@ void DataCreateCsv(PetriNet& tree, const int num_place) {
 			file_x << v;
 		}
 
+		begin_in = true;
+		for (auto v : Q_value) {
+			if (!begin_in) {
+				file_Q << ',';
+			}
+			else begin_in = false;
+			file_Q << v;
+		}
+
 		/* 存入h */
 		file_h << node->h_;
 	}
@@ -358,6 +391,7 @@ void DataCreateCsv(PetriNet& tree, const int num_place) {
 	file_m.close();
 	file_x.close();
 	file_h.close();
+	file_Q.close();
 }
 
 /* 信息输出 */
@@ -382,8 +416,17 @@ void InfoCreate(PetriNet& tree)
 		file << "Node size = " << sizeof(Node);
 	}
 
+	for (auto nodes : tree.entire_list_) {
+		for (auto node : nodes.second) {
+			if (node->sons_) {
+				std::cout << "BackTree exception\n" << std::endl;
+			}
+		}
+	}
+
+	std::cout << "Goal nodes  = " << tree.goal_nodes_.size() << '\n';
 	for (auto &goal_ : tree.goal_nodes_) {
-		std::cout << "Mark：" << goal_->to_string() << "  " << "g = " << goal_->g_ << std::endl;
+		std::cout << "Mark：" << goal_->to_string() << "  " << "g = " << goal_->g_ << '\n';
 	}
 
 	file.close();

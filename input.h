@@ -1,6 +1,6 @@
 #pragma once
 /********************************************************
- * @File name：REACHABLE_TREE_DATA_INPUT_H_
+ * @File name：REACHABLE_TREE_INPUT_H_
  * @Funciton ：Input basic information of timed Petri Net
  * @Content  ：m0, delay, goal, C+, C-
  * @Update   ：2023/07/18 11:30
@@ -9,16 +9,18 @@
 /* 任务量更改 */
 constexpr auto kInitMark = "./data/lj/111/m0.txt";
 constexpr auto kGoalMarking = "./data/lj/111/GoalMarking.txt";
-/* 数据集txt文件 */
+
+/* 数据集txt 可视化gv 信息info文件 */
 constexpr auto kOutputTxtPath = "./data/lj/111/Dataset.txt";
+constexpr auto kOutputGvPath = "./data/lj/111/Reachable_Graph.gv";
+constexpr auto kInfoPath = "./data/lj/111/Info.txt";
+
 /* lyd 数据集csv文件 */
 constexpr auto kOutputCsvMPath = "./data/lj/111/m.csv";
 constexpr auto kOutputCsvXPath = "./data/lj/111/x.csv";
 constexpr auto kOutputCsvHPath = "./data/lj/111/h.csv";
-/* 可视化gv文件 */
-constexpr auto kOutputGvPath = "./data/lj/111/Reachable_Graph.gv";
-/* 信息文件 */
-constexpr auto kInfoPath = "./data/lj/111/Info.txt";
+constexpr auto kOutputCsvQPath = "./data/lj/111/Q.csv";
+
 /* 无需更改 */
 constexpr auto kPrePath = "./data/lj/Basic/pre.txt";
 constexpr auto kPostPath = "./data/lj/Basic/post.txt";

@@ -68,12 +68,13 @@ public:
 	unsigned int id_;
 	/* 节点池 */
 	NodePool* pool_;
+	/* Q */
+	std::vector<std::pair<short, float>> Q_;
 	/* 父节点（激发变迁、id、激发所需代价、父节点指针） */
 	std::vector<std::tuple<unsigned short, unsigned int, unsigned int, ptrNode >> fathers;
 	/* 标识（只含有token的place） */
 	vector<Place> state_;
 	Node(NodePool* pool) :discarded_(false), is_deadlock_(false), is_open_(false), g_(0), sons_(0), h_(FLT_MAX), id_(Node::num), pool_(pool) { ++Node::num; }
-
 
 	/* 判断节点是否相同 */
 	bool operator==(Node& n) {
@@ -173,6 +174,7 @@ public:
 		}
 		return str;
 	}
+
 private:
 	Node() = delete;
 };

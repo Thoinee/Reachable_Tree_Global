@@ -13,8 +13,7 @@
 #include "output.h"
 
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]){
 	/* 读数据 */
 	std::vector<int> m0 = ReadVector<int>(kInitMark);
 	std::vector<int> d0 = ReadVector<int>(kTimePath);
@@ -33,7 +32,7 @@ int main(int argc, char* argv[])
 	/* 信息打印 */
 	std::thread t1(GlobalGraphCreate, std::ref(petri));
 	std::thread t2(DataCreateTxt, std::ref(petri), m0.size());
-	std::thread t3(DataCreateCsv, std::ref(petri), m0.size());
+	std::thread t3(DataCreateCsv, std::ref(petri), m0.size(), petri.num_transition_);
 	t1.join();
 	t2.join();
 	t3.join();

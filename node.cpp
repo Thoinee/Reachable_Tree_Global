@@ -35,6 +35,7 @@ void NodePool::Recycling(ptrNode node) {
 	node->h_ = FLT_MAX;
 	node->is_deadlock_ = false;
 	node->is_open_ = false;
+	node->Q_.clear();
 	node->fathers.clear();
 	node->state_.clear();
 	buf.push(node);

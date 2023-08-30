@@ -1,10 +1,10 @@
 #pragma once
 /*******************************************************
- * @File name：REACHABLE_TREE_PETRI_NET_H_
+ * @File name：REACHABLE_TREE_PETRI_H_
  * @Funciton ：Create class PetriNet
  * @Content  ：<1> Implete the operation rules of Timed
  *                 Petri Net
- *             <2> Introduce new and old node judgment
+ *             <2> Introduce new and old nodes judgement
  * @Update   ：2023/08/21 13:25
  ******************************************************/
 
@@ -206,38 +206,51 @@ public:
 			if (newnode->state_[i].v_ != oldnode->state_[i].v_)
 				return false;
 		}
-		if (newnode->g_ == oldnode->g_) {
-			oldnode->fathers.push_back(newnode->fathers[0]);
-			std::get<3>(newnode->fathers[0])->sons_++;
-		}
+		oldnode->fathers.push_back(newnode->fathers[0]);
+		std::get<3>(newnode->fathers[0])->sons_++;
 		return true;
 	}
 
-	/* 先 g 后 v 进行判断(是否为新节点) */
+	/* 先 g 后 v 进行判断(是否为新节点) */   
 	bool IsNew(ptrNode& newnode, ptrNode& oldnode) {
 		if (newnode->g_ > oldnode->g_) {
 			return false;
 		}
 		short equal = 0;  // equal：相同v的库所
 		for (int i = 0; i < newnode->state_.size(); ++i) {
-			if (newnode->state_[i].v_ < oldnode->state_[i].v_)
+			if (newnode->state_[i].v_ < oldnode->state_[i].v_) {
+				return false;
+			}
+			else if (newnode->state_[i].v_ == oldnode->state_[i].v_) {
+				equal++;
+			}              
+		}
+		if (equal == newnode->state_.size()) {
+			for (auto f : oldnode->fathers) {
+				newnode->fathers.push_back(f);
+				std::get<3>(f)->sons_++;
+			}
+			/*auto f_node = oldnode->fathers[0];
+			newnode->fathers.push_back(f_node);
+			std::get<3>(f_node)->sons_++;*/
+		}
+
+		return true;
+	}
+
+	/* 时间轴判断(是否为旧节点) */
+	bool IsOld(ptrNode& newnode, ptrNode& oldnode) {
+		short equal = 0;
+		for (int i = 0; i < newnode->state_.size(); ++i) {
+			if (newnode->g_ - newnode->state_[i].v_ < oldnode->g_ - oldnode->state_[i].v_)
 				return false;
 			else if (newnode->state_[i].v_ == oldnode->state_[i].v_) {
 				equal++;
 			}
 		}
 		if (equal == oldnode->state_.size()) {
-			newnode->fathers.push_back(oldnode->fathers[0]);
-			std::get<3>(oldnode->fathers[0])->sons_++;
-		}
-		return true;
-	}
-
-	/* 时间轴判断(是否为旧节点) */
-	bool IsOld(ptrNode& newnode, ptrNode& oldnode) {
-		for (int i = 0; i < newnode->state_.size(); ++i) {
-			if (newnode->g_ - newnode->state_[i].v_ < oldnode->g_ - oldnode->state_[i].v_)
-				return false;
+			oldnode->fathers.push_back(newnode->fathers[0]);
+			std::get<3>(newnode->fathers[0])->sons_++;
 		}
 		return true;
 	}
@@ -245,41 +258,55 @@ public:
 	/* 新旧节点判断 */
  	std::pair<bool, list<ptrNode>*> IsNewNode(ptrNode newnode) {
 		auto str = newnode->to_string();
-		if (entire_list_.count(str) <= 0)
+		if (entire_list_.count(str) <= 0) {
 			return std::make_pair(1, nullptr);
-		auto it = entire_list_.find(str);
-		for (auto itor = it->second.begin(); itor != it->second.end();) {
-			auto oldnode = *itor;
-			if (IsNew(oldnode, newnode)) {
-				return std::make_pair(0, &(it->second));
-			}
-			if (IsNew(newnode, oldnode)) {
-				if (oldnode->sons_ == 0) {
-					for (auto f : oldnode->fathers) {
-						auto f_node = std::get<3>(f);
-						if ((--f_node->sons_) == 0) {
-							leaf_nodes_.emplace(f_node->id_, f_node);
-						}
-					}
-
-					if (leaf_nodes_.count(oldnode->id_)) {
-						leaf_nodes_.erase(oldnode->id_);
-					} // 在叶子节点表中删除oldnode
-					else if (deadlock_nodes_.count(oldnode->id_)) {
-						deadlock_nodes_.erase(oldnode->id_);
-					} // 在死锁节点表中删除oldnode
-
-					if (!oldnode->is_open_) {  // 只回收不在open表中的节点
-						pool_.Recycling(oldnode);
-					}
-					else oldnode->discarded_ = true;
-
-					itor = it->second.erase(itor);
-				}
-				else { itor++; }
-			}
-			else { itor++; }
 		}
+		auto it = entire_list_.find(str);
+
+		/* 先 g 后 v */
+		//for (auto itor = it->second.begin(); itor != it->second.end();) {
+		//	auto oldnode = *itor;
+		//	/* 判断新拓展出来节点的新旧性 */
+		//	if (IsOld(newnode, oldnode)) {
+		//		return std::make_pair(0, &(it->second));
+		//	}
+		//	/* 判断是否删除旧节点 */
+		//	if (IsOld(oldnode, newnode)) {
+		//		if (oldnode->sons_ == 0) { 
+		//			for (auto f : oldnode->fathers) {
+		//				auto f_node = std::get<3>(f);
+		//				if ((--f_node->sons_) == 0) {
+		//					leaf_nodes_.emplace(f_node->id_, f_node);
+		//				}
+		//			}
+
+		//			if (leaf_nodes_.count(oldnode->id_)) {
+		//				leaf_nodes_.erase(oldnode->id_);
+		//			} // 在叶子节点表中删除oldnode
+		//			else if (deadlock_nodes_.count(oldnode->id_)) {
+		//				deadlock_nodes_.erase(oldnode->id_);
+		//			} // 在死锁节点表中删除oldnode
+
+		//			if (!oldnode->is_open_) {  // 只回收不在open表中的节点
+		//				pool_.Recycling(oldnode);
+		//			}
+		//			else { oldnode->discarded_ = true; }      
+
+		//			itor = it->second.erase(itor); // 从close表中删除
+		//		}
+		//		else { itor++; }
+		//	}
+		//	else { itor++; }
+		//}
+
+		/* 传统判断 */
+		for (auto itor = it->second.begin(); itor != it->second.end(); ++itor) {
+			auto oldnode = *itor;
+			if (IsSame(newnode, oldnode)) {
+				return std::make_pair(0, &it->second);
+			}
+		}
+
 		return std::make_pair(1, &(it->second));
 	}
 
@@ -290,16 +317,15 @@ public:
 		while (!open_list_.empty()) {
 			auto curnode = open_list_.top();
 			open_list_.pop();
-			if (curnode->discarded_)
-				continue;
+			if (curnode->discarded_) { continue; }
 			auto enables = EnableTrans(curnode);
 			if (enables.empty()) {
 				curnode->is_deadlock_ = true;
 				deadlock_nodes_.emplace(curnode->id_, curnode);
+				continue;
 			}
-			else {
-				for (auto t : enables)
-					Fire(curnode, t);
+			for (auto t : enables) {
+				Fire(curnode, t); 
 			}
 		}
 		clock_t end = clock();
@@ -324,7 +350,9 @@ public:
 			for (auto f : node->fathers) {
 				auto fnode = std::get<3>(f);
 				fnode->h_ = std::min(node->h_ + std::get<2>(f), fnode->h_);
-				if (fnode->sons_ <= 0) { std::cout << "false" << std::endl; }
+				if (node->h_ < 9999) {
+					fnode->Q_.push_back(std::make_pair(std::get<0>(f), node->h_));
+				}
 				if ((--fnode->sons_) == 0) {
 					back_node.push_back(fnode);
 				}
