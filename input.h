@@ -7,19 +7,19 @@
  *******************************************************/
 
 /* 任务量更改 */
-constexpr auto kInitMark = "./data/lj/111/m0.txt";
-constexpr auto kGoalMarking = "./data/lj/111/GoalMarking.txt";
+constexpr auto kInitMark = "./data/lj/122/m0.txt";
+constexpr auto kGoalMarking = "./data/lj/122/GoalMarking.txt";
 
 /* 数据集txt 可视化gv 信息info文件 */
-constexpr auto kOutputTxtPath = "./data/lj/111/Dataset.txt";
-constexpr auto kOutputGvPath = "./data/lj/111/Reachable_Graph.gv";
-constexpr auto kInfoPath = "./data/lj/111/Info.txt";
+constexpr auto kOutputTxtPath = "./data/lj/122/Dataset.txt";
+constexpr auto kOutputGvPath = "./data/lj/122/Reachable_Graph.gv";
+constexpr auto kInfoPath = "./data/lj/122/Info.txt";
 
 /* lyd 数据集csv文件 */
-constexpr auto kOutputCsvMPath = "./data/lj/111/m.csv";
-constexpr auto kOutputCsvXPath = "./data/lj/111/x.csv";
-constexpr auto kOutputCsvHPath = "./data/lj/111/h.csv";
-constexpr auto kOutputCsvQPath = "./data/lj/111/Q.csv";
+constexpr auto kOutputCsvMPath = "./data/lj/122/m.csv";
+constexpr auto kOutputCsvXPath = "./data/lj/122/x.csv";
+constexpr auto kOutputCsvHPath = "./data/lj/122/h.csv";
+constexpr auto kOutputCsvQPath = "./data/lj/122/Q.csv";
 
 /* 无需更改 */
 constexpr auto kPrePath = "./data/lj/Basic/pre.txt";
@@ -61,8 +61,7 @@ vector<vector<int>> ReadMatrix(const char* path, int m)
 {
 	vector<vector<int>> matrix;
 	std::ifstream file(path, std::ios::in);
-	if (!file.is_open())
-	{
+	if (!file.is_open()) {
 		std::cout << "can not open file:" << path << std::endl;
 		exit(1);
 	}
@@ -83,8 +82,7 @@ vector<vector<int>> ReadMatrix(const char* path, int m)
 /* 获取目标节点标识 */
 vector<int> GetGoalMark(vector<int>& goalMarking, vector<int>& goalPlace, int nums) {
 	vector<int> ans(nums, 0);
-	if (goalMarking.size() != goalPlace.size())
-	{
+	if (goalMarking.size() != goalPlace.size()){
 		std::cout << "The dimension of goal marking and goal place is not consistent!" << std::endl;
 		exit(-1);
 	}

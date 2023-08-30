@@ -80,8 +80,7 @@ public:
 	bool operator==(Node& n) {
 		if (n.state_.size() != this->state_.size())
 			return false;
-		for (int i = 0; i < n.state_.size(); ++i)
-		{
+		for (int i = 0; i < n.state_.size(); ++i) {
 			if (n.state_[i].row_ != this->state_[i].row_ ||
 				n.state_[i].tokens_ != this->state_[i].tokens_ ||
 				n.state_[i].v_ != this->state_[i].v_)

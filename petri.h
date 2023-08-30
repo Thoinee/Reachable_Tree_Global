@@ -68,18 +68,19 @@ public:
 
 	/* 初始化参数 */
 	PetriNet(vector<int>& m, vector<int >& d, vector<vector<int>>& p, vector<vector<int>>& q, vector<int>& goal, unsigned int num_threads = 1) :
-		ThreadPool(num_threads), pool_(10000000), m0_(m), delay_(d), goal_(goal)
-	{
-		if (p.size() == 0 || m0_.size() == 0 || delay_.size() == 0 || goal_.size() == 0 || q.size() == 0)
-		{
+		ThreadPool(num_threads), pool_(10000000), m0_(m), delay_(d), goal_(goal) {
+		if (p.size() == 0 || m0_.size() == 0 || delay_.size() == 0 || goal_.size() == 0 || q.size() == 0) {
 			printf("input files error!\n");
 			exit(-1);
 		}
+
 		num_place_ = m.size();
 		num_transition_ = p[0].size();
+
 		Tpre_.resize(num_transition_, vector<int>(num_place_, 0));
 		Tpost_.resize(num_transition_, vector<int>(num_place_, 0));
 		C.resize(num_transition_, vector<int>(num_place_, 0));
+
 		for (int i = 0; i < num_place_; ++i) {
 			int num_of_place = 0;
 			for (int j = 0; j < num_transition_; ++j) {
@@ -90,7 +91,6 @@ public:
 					++num_of_place;
 				}
 			}
-
 		}
 
 		root_ = pool_.GetNode();
@@ -98,14 +98,17 @@ public:
 			if (m0_[i] != 0)
 				root_->state_.emplace_back(Place(m0_[i], i, 0));
 		}
+
 		goal_node_ = pool_.GetNode();
 		for (int i = 0; i < num_place_; ++i) {
 			if (goal_[i] != 0)
 				goal_node_->state_.emplace_back(Place(goal_[i], i, 0));
 		}
+
 		open_list_.push(root_);
 		std::list<ptrNode> temp = { root_ };
 		entire_list_.emplace(root_->to_string(), std::move(temp));  // move移动资源，原地址存放的资源不存在
+
 		return;
 	}
 
@@ -175,16 +178,15 @@ public:
 		}
 		auto str = newnode->to_string();
 		auto pair = IsNewNode(newnode);   // return <bool,list<ptrNode>>  bool = 1 or 为新节点  bool = 0 旧节点
-		if (pair.second == nullptr)
-		{
+		if (pair.second == nullptr) {
 			list<ptrNode> temp;
 			temp.push_back(newnode);
 			entire_list_.emplace(str, std::move(temp));
 			open_list_.push(newnode);
 			newnode->is_open_ = true;
 		}
-		else
-		{    /* 不是新节点，回收 */
+		else {  
+			/* 不是新节点，回收 */
 			if (!pair.first) {
 				if ((--curnode->sons_) == 0)
 					leaf_nodes_.emplace(curnode->id_, curnode);
