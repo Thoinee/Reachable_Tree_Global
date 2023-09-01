@@ -20,7 +20,7 @@
 static std::unordered_set<int> ignore_m = { 12, 18, 34 }; // 省略目标库所
 static std::unordered_set<int> ignore_v = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17, 18, 33, 34 }; // 省略初始库所、资源库所、目标库所
 
-static float max_accept_multiple = 2; // 可容许最大倍数
+static float max_accept_multiple = 1; // 可容许最大倍数
 
 /* 节点计数器 */
 static long tree_nodes_num = 0;  // 状态数
@@ -28,21 +28,26 @@ static long total_nodes_num = 0; // 数据量
 
 /* 生成全局可达图 */
 void GlobalGraphCreate(PetriNet& tree) {
+	/* 数据保留阈值 */
+	auto threshold_value = max_accept_multiple * tree.root_->h_;
+	/* 图节点输出流 */
 	std::ofstream file(kOutputGvPath);
 	file << "digraph {" << '\n';
 	/* 设置节点 */
-	for (auto& node : tree.goal_nodes_) {
-		file << "\"" 
-			 << "m" << node->id_ 
-			 << "_g" << node->g_ 
-			 << "_h" << node->h_
-			 << "\"" 
-			 << " [color=red style=filled]" 
-			 << "\n";
+	for (auto& node: tree.goal_nodes_) {
+		if (node->g_ + node->h_ <= threshold_value) {
+			file << "\""
+				 << "m" << node->id_
+				 << "_g" << node->g_
+				 << "_h" << node->h_
+				 << "\""
+				 << " [color=red style=filled]"
+				 << "\n";
+		}
 	}
-	for (auto& nodes : tree.entire_list_) {
-		for (auto& node : nodes.second) {
-			if (node->h_ < 9999) {
+	for (auto& nodes: tree.entire_list_) {
+		for (auto& node: nodes.second) {
+			if (node->h_ < 9999 && node->g_ + node->h_ <= threshold_value) {
 				if (tree.deadlock_nodes_.count(node->id_) > 0) {
 					file << "\""
 						<< "m" << node->id_
@@ -75,40 +80,44 @@ void GlobalGraphCreate(PetriNet& tree) {
 
 	/* 设置节点间的连接弧 */
 	/* 思想：从该节点找到其父节点 并进行连接 */
-	for (auto& node : tree.goal_nodes_) {
-		for (auto& father : node->fathers) {
-			auto f_node = std::get<3>(father);
-			file << "\"" 
-				 << "m" << f_node->id_ 
-				 << "_g" << f_node->g_ 
-				 << "_h" << f_node->h_
-				 << "\"" 
-				 << " -> " 
-				 << "\"" 
-				 << "m" << node->id_ 
-				 << "_g" << node->g_ 
-				 << "_h" << node->h_
-				 << "\"" 
-				 << " [label=t" << std::get<0>(father) << "]\n";
+	for (auto& node: tree.goal_nodes_) {
+		if (node->g_ + node->h_ <= threshold_value) {
+			for (auto& father: node->fathers) {
+				auto f_node = std::get<3>(father);
+				file << "\""
+					<< "m" << f_node->id_
+					<< "_g" << f_node->g_
+					<< "_h" << f_node->h_
+					<< "\""
+					<< " -> "
+					<< "\""
+					<< "m" << node->id_
+					<< "_g" << node->g_
+					<< "_h" << node->h_
+					<< "\""
+					<< " [label=t" << std::get<0>(father) << "]\n";
+			}
 		}
 	}
-	for (auto& nodes : tree.entire_list_) {
-		for (auto& node : nodes.second) {
-			if (node->h_ < 9999) {
-				for (auto& father : node->fathers) {
+	for (auto& nodes: tree.entire_list_) {
+		for (auto& node: nodes.second) {
+			if (node->h_ < 9999 && node->g_ + node->h_ <= threshold_value) {
+				for (auto& father: node->fathers) {
 					auto f_node = std::get<3>(father);
-					file << "\"" 
-						 << "m" << f_node->id_ 
-						 << "_g" << f_node->g_ 
-						 << "_h" << f_node->h_
-						 << "\"" 
-						 << " -> " 
-						 << "\"" 
-						 <<"m" << node->id_ 
-						 << "_g" << node->g_ 
-						 << "_h" << node->h_ 
-						 << "\"" 
-						 << " [label=t" << std::get<0>(father) << "]\n";
+					if (f_node->g_ + f_node->h_ <= threshold_value) {
+						file << "\""
+							<< "m" << f_node->id_
+							<< "_g" << f_node->g_
+							<< "_h" << f_node->h_
+							<< "\""
+							<< " -> "
+							<< "\""
+							<< "m" << node->id_
+							<< "_g" << node->g_
+							<< "_h" << node->h_
+							<< "\""
+							<< " [label=t" << std::get<0>(father) << "]\n";
+					}
 				}
 			}
 		}
@@ -124,7 +133,7 @@ void GraphCreate(PetriNet& tree) {
 	short num_of_goals = 0;
 	std::ofstream ofs(kOutputGvPath, std::ios::out);
 	ofs << "digraph {" << '\n';
-	for (auto &node : tree.goal_nodes_) {
+	for (auto& node: tree.goal_nodes_) {
 		back_node.push(node);
 	}
 	while (!back_node.empty()){
@@ -272,7 +281,7 @@ std::pair<vector<T>, vector<T>> ToVector(const ptrNode node, const int num_place
 vector<float> QToVector(const ptrNode node, const int num_transition) {
 	vector<float> ans(num_transition, 1);
 	auto it = node->Q_;
-	for (auto q : it) {
+	for (auto q: it) {
 		ans[q.first] = -q.second;
 	}
 	return ans;
@@ -288,22 +297,25 @@ void DataCreateTxt(PetriNet& tree, const int num_place) {
 	file << std::setiosflags(std::ios::fixed) << std::setprecision(2);
 
 	bool begin = true;
-	for (auto node : tree.goal_nodes_) {
+	for (auto node: tree.goal_nodes_) {
+		if (node->g_ + node->h_ > threshold_value)
+			continue;
 		if (!begin) {
 			file << '\n';
 		}
 		else
 			begin = false;
 		auto vec = ToVector<float>(node, num_place, tree.delay_);
-		for (auto v : vec) {
+		for (auto v: vec) {
 			file << v << '\t';
 		}
 		file << node->h_;
+		total_nodes_num++;
 	}
 
-	for (auto nodes : tree.entire_list_) {
-		for (auto node : nodes.second) {
-			if (node->h_ > 9999 || node->g_ + node->h_ >= threshold_value)
+	for (auto nodes: tree.entire_list_) {
+		for (auto node: nodes.second) {
+			if (node->h_ > 9999 || node->g_ + node->h_ > threshold_value)
 				continue;
 			if (!begin) {
 				file << '\n';
@@ -311,7 +323,7 @@ void DataCreateTxt(PetriNet& tree, const int num_place) {
 			else
 				begin = false;
 			auto vec = ToVector<float>(node, num_place, tree.delay_);
-			for (auto v : vec) {
+			for (auto v: vec) {
 				file << v << '\t';
 			}
 			file << node->h_;
@@ -337,15 +349,15 @@ void DataCreateCsv(PetriNet& tree, const int num_place, const int num_transition
 	/* 所有节点 */
 	vector<ptrNode> total_nodes;
 
-	/* 存入待反向的节点 */
+	/* 存入待输出的节点 */
 	total_nodes.insert(total_nodes.end(), tree.goal_nodes_.begin(), tree.goal_nodes_.end()); // 目标节点
-	for (auto nodes : tree.entire_list_) {
+	for (auto nodes: tree.entire_list_) {
 		total_nodes.insert(total_nodes.end(), nodes.second.begin(), nodes.second.end()); // 路径节点
 	}
 
 	bool begin = true; // 每条数据之间的换行符
-	for (auto node : total_nodes) {
-		if (node->h_ > 9999 || node->h_ >= threshold_value) 
+	for (auto node: total_nodes) {
+		if (node->h_ > 9999 || node->h_ + node->g_ >= threshold_value) 
 			continue;
 		if (!begin) {
 			file_m << '\n';
@@ -360,7 +372,7 @@ void DataCreateCsv(PetriNet& tree, const int num_place, const int num_transition
 
 		/* 存入m */
 		bool begin_in = true; // 数据项之间的分隔符
-		for (auto v : pair.first) {
+		for (auto v: pair.first) {
 			if (!begin_in) {
 				file_m << ',';
 			}
@@ -370,7 +382,7 @@ void DataCreateCsv(PetriNet& tree, const int num_place, const int num_transition
 
 		/* 存入x */
 		begin_in = true;
-		for (auto v : pair.second) {
+		for (auto v: pair.second) {
 			if (!begin_in) {
 				file_x << ',';
 			}
@@ -379,7 +391,7 @@ void DataCreateCsv(PetriNet& tree, const int num_place, const int num_transition
 		}
 
 		begin_in = true;
-		for (auto v : Q_value) {
+		for (auto v: Q_value) {
 			if (!begin_in) {
 				file_Q << ',';
 			}
@@ -414,12 +426,12 @@ void InfoCreate(PetriNet& tree)
 	else {
 		file << "Total nodes = " << tree_nodes_num << '\n';
 		file << "Target nodes  = " << tree.goal_nodes_.size() << '\n';
-		file << "Dataset = " << total_nodes_num + tree.goal_nodes_.size() << '\n';
+		file << "Dataset = " << total_nodes_num << '\n';
 		file << "The minimum time = " << tree.root_->h_ << "s" << '\n';
 		file << "Node size = " << sizeof(Node);
 	}
 
-	for (auto nodes : tree.entire_list_) {
+	for (auto nodes: tree.entire_list_) {
 		for (auto node : nodes.second) {
 			if (node->sons_) {
 				std::cout << "BackTree exception\n" << std::endl;
@@ -428,7 +440,7 @@ void InfoCreate(PetriNet& tree)
 	}
 
 	std::cout << "Goal nodes  = " << tree.goal_nodes_.size() << '\n';
-	for (auto &goal_ : tree.goal_nodes_) {
+	for (auto &goal_: tree.goal_nodes_) {
 		std::cout << "Mark：" << goal_->to_string() << "  " << "g = " << goal_->g_ << '\n';
 	}
 

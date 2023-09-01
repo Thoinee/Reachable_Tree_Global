@@ -266,48 +266,47 @@ public:
 		auto it = entire_list_.find(str);
 
 		/* 先 g 后 v */
-		//for (auto itor = it->second.begin(); itor != it->second.end();) {
-		//	auto oldnode = *itor;
-		//	/* 判断新拓展出来节点的新旧性 */
-		//	if (IsOld(newnode, oldnode)) {
-		//		return std::make_pair(0, &(it->second));
-		//	}
-		//	/* 判断是否删除旧节点 */
-		//	if (IsOld(oldnode, newnode)) {
-		//		if (oldnode->sons_ == 0) { 
-		//			for (auto f : oldnode->fathers) {
-		//				auto f_node = std::get<3>(f);
-		//				if ((--f_node->sons_) == 0) {
-		//					leaf_nodes_.emplace(f_node->id_, f_node);
-		//				}
-		//			}
+		for (auto itor = it->second.begin(); itor != it->second.end();) {
+			auto oldnode = *itor;
+			/* 判断新拓展出来节点的新旧性 */
+			if (IsNew(oldnode, newnode)) {
+				return std::make_pair(0, &(it->second));
+			}
+			/* 判断是否删除旧节点 */
+			if (IsNew(newnode, oldnode)) {
+				if (oldnode->sons_ == 0) { 
+					for (auto f: oldnode->fathers) {
+						auto f_node = std::get<3>(f);
+						if ((--f_node->sons_) == 0) {
+							leaf_nodes_.emplace(f_node->id_, f_node);
+						}
+					}
 
-		//			if (leaf_nodes_.count(oldnode->id_)) {
-		//				leaf_nodes_.erase(oldnode->id_);
-		//			} // 在叶子节点表中删除oldnode
-		//			else if (deadlock_nodes_.count(oldnode->id_)) {
-		//				deadlock_nodes_.erase(oldnode->id_);
-		//			} // 在死锁节点表中删除oldnode
+					if (leaf_nodes_.count(oldnode->id_)) {
+						leaf_nodes_.erase(oldnode->id_);
+					} // 在叶子节点表中删除oldnode
+					else if (deadlock_nodes_.count(oldnode->id_)) {
+						deadlock_nodes_.erase(oldnode->id_);
+					} // 在死锁节点表中删除oldnode
 
-		//			if (!oldnode->is_open_) {  // 只回收不在open表中的节点
-		//				pool_.Recycling(oldnode);
-		//			}
-		//			else { oldnode->discarded_ = true; }      
-
-		//			itor = it->second.erase(itor); // 从close表中删除
-		//		}
-		//		else { itor++; }
-		//	}
-		//	else { itor++; }
-		//}
+					if (!oldnode->is_open_) {  // 只回收不在open表中的节点
+						pool_.Recycling(oldnode);
+					}
+					else oldnode->discarded_ = true;
+					itor = it->second.erase(itor); // 从close表中删除
+				}
+				else itor++; 
+			}
+			else itor++;
+		}
 
 		/* 传统判断 */
-		for (auto itor = it->second.begin(); itor != it->second.end(); ++itor) {
+		/*for (auto itor = it->second.begin(); itor != it->second.end(); ++itor) {
 			auto oldnode = *itor;
 			if (IsSame(newnode, oldnode)) {
 				return std::make_pair(0, &it->second);
 			}
-		}
+		}*/
 
 		return std::make_pair(1, &(it->second));
 	}
@@ -326,7 +325,7 @@ public:
 				deadlock_nodes_.emplace(curnode->id_, curnode);
 				continue;
 			}
-			for (auto t : enables) {
+			for (auto t: enables) {
 				Fire(curnode, t); 
 			}
 		}
@@ -341,11 +340,11 @@ public:
 		clock_t start = clock();
 		vector<ptrNode> back_node = goal_nodes_;
 
-		for (auto& node_ : deadlock_nodes_) {
-			back_node.insert(back_node.end(), node_.second);
+		for (auto& node: deadlock_nodes_) {
+			back_node.insert(back_node.end(), node.second);
 		}
-		for (auto& node_ : leaf_nodes_) {
-			back_node.insert(back_node.end(), node_.second);
+		for (auto& node: leaf_nodes_) {
+			back_node.insert(back_node.end(), node.second);
 		}
 
 		while (!back_node.empty()) {
@@ -372,7 +371,7 @@ public:
 	void DeadLockNodeDeal() {
 		vector<ptrNode> back_nodes;
 
-		for (auto &obj : deadlock_nodes_) {
+		for (auto& obj: deadlock_nodes_) {
 			auto node = obj.second;
 			node->h_ = root_->h_ * 1.2;
 			back_nodes.push_back(node);
@@ -381,7 +380,7 @@ public:
 		while (!back_nodes.empty()) {
 			auto node = back_nodes.back();
 			back_nodes.pop_back();
-			for (auto f : node->fathers) {
+			for (auto f: node->fathers) {
 				auto fnode = std::get<3>(f);
 				if (fnode->h_ <= node->h_ + std::get<2>(f))
 					continue;
