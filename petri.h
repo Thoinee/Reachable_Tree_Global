@@ -208,8 +208,13 @@ public:
 			if (newnode->state_[i].v_ != oldnode->state_[i].v_)
 				return false;
 		}
-		oldnode->fathers.push_back(newnode->fathers[0]);
-		std::get<3>(newnode->fathers[0])->sons_++;
+		if (newnode->g_ < oldnode->g_) {
+			return false;
+		}
+		for (auto f: newnode->fathers) {
+			oldnode->fathers.push_back(f);
+			std::get<3>(f)->sons_++;
+		}
 		return true;
 	}
 
@@ -228,15 +233,11 @@ public:
 			}              
 		}
 		if (equal == newnode->state_.size()) {
-			for (auto f : oldnode->fathers) {
+			for (auto f: oldnode->fathers) {
 				newnode->fathers.push_back(f);
 				std::get<3>(f)->sons_++;
 			}
-			/*auto f_node = oldnode->fathers[0];
-			newnode->fathers.push_back(f_node);
-			std::get<3>(f_node)->sons_++;*/
 		}
-
 		return true;
 	}
 
@@ -274,8 +275,8 @@ public:
 			}
 			/* 判断是否删除旧节点 */
 			if (IsNew(newnode, oldnode)) {
-				if (oldnode->sons_ == 0) { 
-					for (auto f: oldnode->fathers) {
+				if (oldnode->sons_ == 0) {
+					for (auto f : oldnode->fathers) {
 						auto f_node = std::get<3>(f);
 						if ((--f_node->sons_) == 0) {
 							leaf_nodes_.emplace(f_node->id_, f_node);
@@ -284,30 +285,21 @@ public:
 
 					if (leaf_nodes_.count(oldnode->id_)) {
 						leaf_nodes_.erase(oldnode->id_);
-					} // 在叶子节点表中删除oldnode
+					}  // 在叶子节点表中删除oldnode
 					else if (deadlock_nodes_.count(oldnode->id_)) {
 						deadlock_nodes_.erase(oldnode->id_);
-					} // 在死锁节点表中删除oldnode
+					}  // 在死锁节点表中删除oldnode
 
 					if (!oldnode->is_open_) {  // 只回收不在open表中的节点
 						pool_.Recycling(oldnode);
 					}
 					else oldnode->discarded_ = true;
-					itor = it->second.erase(itor); // 从close表中删除
+					itor = it->second.erase(itor);  // 从close表中删除
 				}
-				else itor++; 
+				else itor++;
 			}
 			else itor++;
 		}
-
-		/* 传统判断 */
-		/*for (auto itor = it->second.begin(); itor != it->second.end(); ++itor) {
-			auto oldnode = *itor;
-			if (IsSame(newnode, oldnode)) {
-				return std::make_pair(0, &it->second);
-			}
-		}*/
-
 		return std::make_pair(1, &(it->second));
 	}
 
