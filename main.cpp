@@ -12,31 +12,31 @@
 #include "petri.h"
 #include "output.h"
 
-
 int main(int argc, char* argv[]){
 	/* 读数据 */
-	std::vector<int> m0 = ReadVector<int>(kInitMark);
-	std::vector<int> d0 = ReadVector<int>(kTimePath);
-	std::vector<vector<int>> pre = ReadMatrix(kPrePath, m0.size());
-	std::vector<vector<int>> post = ReadMatrix(kPostPath, m0.size());
-	std::vector<int> goals = ReadVector<int>(kGoalPlace);
-	std::vector<int> goal_marking = ReadVector<int>(kGoalMarking);
-	std::vector<int> goal_vector = GetGoalMark(goal_marking, goals, m0.size());
+	std::vector<int> m0 = readVector<int>(kInitMark);
+	std::vector<int> d0 = readVector<int>(kTimePath);
+	std::vector<vector<int>> pre = readMatrix(kPrePath, m0.size());
+	std::vector<vector<int>> post = readMatrix(kPostPath, m0.size());
+	std::vector<int> goals = readVector<int>(kGoalPlace);
+	std::vector<int> goal_marking = readVector<int>(kGoalMarking);
+	std::vector<int> goal_vector = getGoalMark(goal_marking, goals, m0.size());
 
 	/* 正向树与反向树 */
 	PetriNet petri(m0, d0, pre, post, goal_vector, 1);
-	petri.ForwardTree();
-	petri.BackTree();
-	petri.DeadLockNodeDeal();
+	petri.forwardTree();
+	petri.backTree();
+	petri.deadLockNodeDeal();
 
 	/* 信息打印 */
-	std::thread t1(GlobalGraphCreate, std::ref(petri));
-	std::thread t2(DataCreateTxt, std::ref(petri), m0.size());
-	std::thread t3(DataCreateCsv, std::ref(petri), m0.size(), petri.num_transition_);
+	std::thread t1(globalGraphCreate, std::ref(petri));
+	std::thread t2(dataCreateTxt, std::ref(petri), m0.size());
+	//std::thread t3(dataCreateCsv, std::ref(petri), m0.size(), petri.num_transition_);
+	std::thread t4(infoCreate, std::ref(petri));
 	t1.join();
 	t2.join();
-	t3.join();
-	InfoCreate(petri);
+	//t3.join();
+	t4.join();
 
 	return 0;
 }

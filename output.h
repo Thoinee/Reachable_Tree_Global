@@ -13,21 +13,26 @@
 #include <queue>
 #include <unordered_set>
 #include <iomanip>
+#include <mutex>
 #include "petri.h"
 #include "input.h"
+
+static std::mutex mtx;
 
 /* 无需用到的标识库所和已等待时间库所 */
 static std::unordered_set<int> ignore_m = { 12, 18, 34 }; // 省略目标库所
 static std::unordered_set<int> ignore_v = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17, 18, 33, 34 }; // 省略初始库所、资源库所、目标库所
 
-static float max_accept_multiple = 1; // 可容许最大倍数
+static float max_accept_multiple = 999; // 可容许最大倍数
 
 /* 节点计数器 */
 static long tree_nodes_num = 0;  // 状态数
 static long total_nodes_num = 0; // 数据量
 
 /* 生成全局可达图 */
-void GlobalGraphCreate(PetriNet& tree) {
+void globalGraphCreate(PetriNet& tree) {
+	/* 加锁 */
+	mtx.lock();
 	/* 数据保留阈值 */
 	auto threshold_value = max_accept_multiple * tree.root_->h_;
 	/* 图节点输出流 */
@@ -124,10 +129,12 @@ void GlobalGraphCreate(PetriNet& tree) {
 	}
 	file << "}";
 	file.close();
+	/* 解锁 */
+	mtx.unlock();
 }
 
 /* 输出到达目标路径 */
-void GraphCreate(PetriNet& tree) {
+void graphCreate(PetriNet& tree) {
 	std::queue<ptrNode> back_node;
 	std::unordered_set<unsigned short> already;
 	short num_of_goals = 0;
@@ -141,16 +148,28 @@ void GraphCreate(PetriNet& tree) {
 		back_node.pop();
 		if (num_of_goals < tree.goal_nodes_.size()) {
 			num_of_goals++;
-			ofs << "m" << node->id_ << "_g" << node->g_ << "_h" << node->h_ 
-				<< " [color=red, style=filled]" << "\n";
+			ofs << "m" << node->id_
+				<< "_g" << node->g_
+				<< "_h" << node->h_ 
+				<< " [color=red, style=filled]"
+				<< "\n";
 		}
 		else 
-			ofs << "m" << node->id_ << "_g" << node->g_ << "_h" << node->h_ << "\n";
+			ofs << "m" << node->id_
+				<< "_g" << node->g_
+				<< "_h" << node->h_
+				<< "\n";
 		if (node->fathers.empty()) { continue; }
 		auto f_node = std::get<3>(node->fathers[0]);
-		ofs << "m" << f_node->id_ << "_g" << f_node->g_ << "_h" << f_node->h_
-			<< " -> " << "m" << node->id_ << "_g" << node->g_ << "_h" << node->h_
-			<< " [label=t" << std::get<0>(node->fathers[0]) << "]\n";
+		ofs << "m" << f_node->id_ 
+			<< "_g" << f_node->g_ 
+			<< "_h" << f_node->h_
+			<< " -> " 
+			<< "m" << node->id_ 
+			<< "_g" << node->g_ 
+			<< "_h" << node->h_
+			<< " [label=t" << std::get<0>(node->fathers[0]) 
+			<< "]\n";
 		if (already.count(f_node->id_) == 0) {
 			back_node.push(f_node);
 			already.emplace(f_node->id_);
@@ -162,7 +181,7 @@ void GraphCreate(PetriNet& tree) {
 
 template <typename T>
 /* 转换为数据集格式 */
-vector<T> ToVector(const ptrNode node, const int num_place, const vector<int>& delay) {   // 节点指针  PetriNet库所总数
+vector<T> toVector(const ptrNode node, const int num_place, const vector<int>& delay) {   // 节点指针  PetriNet库所总数
 	auto places = node->state_;
 	int j = 0;   // 对已赋值的库所进行计数
 	std::vector<T> ans;
@@ -238,7 +257,7 @@ vector<T> ToVector(const ptrNode node, const int num_place, const vector<int>& d
 
 template <typename T>
 /* 生成m，x向量 */
-std::pair<vector<T>, vector<T>> ToVector(const ptrNode node, const int num_place) {   // 节点指针  PetriNet库所总数
+std::pair<vector<T>, vector<T>> toVector(const ptrNode node, const int num_place) {   // 节点指针  PetriNet库所总数
 	auto places = node->state_;
 	int j = 0;   // 对已赋值的库所进行计数
 	std::vector<T> ans_m, ans_x;
@@ -288,7 +307,9 @@ vector<float> QToVector(const ptrNode node, const int num_transition) {
 }
 
 /* 生成训练数据集 */
-void DataCreateTxt(PetriNet& tree, const int num_place) {
+void dataCreateTxt(PetriNet& tree, const int num_place) {
+	/* 加锁 */
+	mtx.lock();
 	/* 数据保留阈值 */
 	auto threshold_value = max_accept_multiple * tree.root_->h_;
 	/* 数据集输出流 */
@@ -305,7 +326,7 @@ void DataCreateTxt(PetriNet& tree, const int num_place) {
 		}
 		else
 			begin = false;
-		auto vec = ToVector<float>(node, num_place, tree.delay_);
+		auto vec = toVector<float>(node, num_place, tree.delay_);
 		for (auto v: vec) {
 			file << v << '\t';
 		}
@@ -322,7 +343,7 @@ void DataCreateTxt(PetriNet& tree, const int num_place) {
 			}
 			else
 				begin = false;
-			auto vec = ToVector<float>(node, num_place, tree.delay_);
+			auto vec = toVector<float>(node, num_place, tree.delay_);
 			for (auto v: vec) {
 				file << v << '\t';
 			}
@@ -332,10 +353,14 @@ void DataCreateTxt(PetriNet& tree, const int num_place) {
 	}
 
 	file.close();
+	/* 解锁 */
+	mtx.unlock();
 }
 
 /* 分开生成csv文件 */
-void DataCreateCsv(PetriNet& tree, const int num_place, const int num_transition) {
+void dataCreateCsv(PetriNet& tree, const int num_place, const int num_transition) {
+	/* 加锁 */
+	mtx.lock();
 	/* 数据保留阈值 */
 	auto threshold_value = max_accept_multiple * tree.root_->h_;
 	/* m.csv */
@@ -367,7 +392,7 @@ void DataCreateCsv(PetriNet& tree, const int num_place, const int num_transition
 		}
 		else begin = false;
 
-		auto pair = ToVector<int>(node, num_place);  // (m, x)
+		auto pair = toVector<int>(node, num_place);  // (m, x)
 		auto Q_value = QToVector(node, num_transition);  // (Q_index, Q_value)
 
 		/* 存入m */
@@ -407,11 +432,16 @@ void DataCreateCsv(PetriNet& tree, const int num_place, const int num_transition
 	file_x.close();
 	file_h.close();
 	file_Q.close();
+	/* 解锁 */
+	mtx.unlock();
 }
 
 /* 信息输出 */
-void InfoCreate(PetriNet& tree)
+void infoCreate(PetriNet& tree)
 {
+	/* 加锁 */
+	mtx.lock();
+	/* 信息文件输出流 */
 	std::ofstream file(kInfoPath, std::ios::out);
 
 	tree_nodes_num = tree.goal_nodes_.size();
@@ -441,8 +471,10 @@ void InfoCreate(PetriNet& tree)
 
 	std::cout << "Goal nodes  = " << tree.goal_nodes_.size() << '\n';
 	for (auto &goal_: tree.goal_nodes_) {
-		std::cout << "Mark：" << goal_->to_string() << "  " << "g = " << goal_->g_ << '\n';
+		std::cout << "Mark：" << goal_->toString() << "  " << "g = " << goal_->g_ << '\n';
 	}
 
 	file.close();
+	/* 解锁 */
+	mtx.unlock();
 }

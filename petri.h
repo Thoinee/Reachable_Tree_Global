@@ -17,7 +17,7 @@
 #include <list>
 #include <unordered_map>
 #include <stack>
-#include "thread_pool.h"
+#include "ThreadPool.h"
 #include "node.h"
 
 using std::string;
@@ -93,13 +93,13 @@ public:
 			}
 		}
 
-		root_ = pool_.GetNode();
+		root_ = pool_.getNode();
 		for (int i = 0; i < num_place_; ++i) {
 			if (m0_[i] != 0)
 				root_->state_.emplace_back(Place(m0_[i], i, 0));
 		}
 
-		goal_node_ = pool_.GetNode();
+		goal_node_ = pool_.getNode();
 		for (int i = 0; i < num_place_; ++i) {
 			if (goal_[i] != 0)
 				goal_node_->state_.emplace_back(Place(goal_[i], i, 0));
@@ -107,13 +107,13 @@ public:
 
 		open_list_.push(root_);
 		std::list<ptrNode> temp = { root_ };
-		entire_list_.emplace(root_->to_string(), std::move(temp));  // move移动资源，原地址存放的资源不存在
+		entire_list_.emplace(root_->toString(), std::move(temp));  // move移动资源，原地址存放的资源不存在
 
 		return;
 	}
 
 	/* 使能变迁判断 */
-	vector<int> EnableTrans(ptrNode node) {
+	vector<int> enableTrans(ptrNode node) {
 		vector<int> ans;
 		for (int i = 0; i < num_transition_; ++i) {
 			if (*node > Tpre_[i])
@@ -124,7 +124,7 @@ public:
 	}
 
 	/* 目标节点判断 */
-	bool IsGoalNode(ptrNode curnode) {
+	bool isGoalNode(ptrNode curnode) {
 		if (*(curnode) > goal_) {
 			return 1;
 		}
@@ -132,7 +132,7 @@ public:
 	}
 
 	/* 计算已等待时间v、还需等待最长时间λ */
-	int UpdateVk(ptrNode newnode, ptrNode curnode, int t) {
+	int updateVk(ptrNode newnode, ptrNode curnode, int t) {
 		int lambda = 0;
 		for (int i = 0; i < num_place_; ++i) {
 			if (Tpre_[t][i] != 0) {
@@ -151,11 +151,11 @@ public:
 		for (int i = 0; i < newnode->state_.size(); ++i) {
 
 			/** 
-			* 激发变迁后，place有两种情况：
-			* 情况一：原先就有token
-			* 情况二：激发后后置矩阵给予的token
-			* 以下分析为情况一
-			*/
+			 * 激发变迁后，place有两种情况：
+			 * 情况一：原先就有token
+			 * 情况二：激发后后置矩阵给予的token
+			 * 以下分析为情况一
+			 */
 
 			if (Tpost_[t][newnode->state_[i].row_] == 0)
 				// 已等待时间v不超过延迟，否则会出现状态无穷多
@@ -165,19 +165,19 @@ public:
 	}
 
 	/* 变迁激发过程 */
-	void Fire(ptrNode curnode, int t) {
+	void fire(ptrNode curnode, int t) {
 		auto newnode = *curnode + C[t];
 		newnode->discarded_ = false;
-		int waiting_time = UpdateVk(newnode, curnode, t);
+		int waiting_time = updateVk(newnode, curnode, t);
 		newnode->g_ = curnode->g_ + waiting_time;
 		newnode->fathers.emplace_back(std::make_tuple(t, curnode->id_, waiting_time, curnode));
-		if (IsGoalNode(newnode)) {
+		if (isGoalNode(newnode)) {
 			newnode->h_ = 0;
 			goal_nodes_.emplace_back(newnode);
 			return;
 		}
-		auto str = newnode->to_string();
-		auto pair = IsNewNode(newnode);   // return <bool,list<ptrNode>>  bool = 1 or 为新节点  bool = 0 旧节点
+		auto str = newnode->toString();
+		auto pair = isNewNode(newnode);   // return <bool,list<ptrNode>>  bool = 1 or 为新节点  bool = 0 旧节点
 		if (pair.second == nullptr) {
 			list<ptrNode> temp;
 			temp.push_back(newnode);
@@ -190,7 +190,7 @@ public:
 			if (!pair.first) {
 				if ((--curnode->sons_) == 0)
 					leaf_nodes_.emplace(curnode->id_, curnode);
-				pool_.Recycling(newnode);
+				pool_.recycling(newnode);
 				return;
 			}
 			/* 是新节点，放入open_list和entire_list */
@@ -203,7 +203,7 @@ public:
 	}
 
 	/* 传统判断(是否为旧节点) */
-	bool IsSame(ptrNode& newnode, ptrNode& oldnode) {
+	bool isSame(ptrNode& newnode, ptrNode& oldnode) {
 		for (int i = 0; i < newnode->state_.size(); ++i) {
 			if (newnode->state_[i].v_ != oldnode->state_[i].v_)
 				return false;
@@ -219,7 +219,7 @@ public:
 	}
 
 	/* 先 g 后 v 进行判断(是否为新节点) */   
-	bool IsNew(ptrNode& newnode, ptrNode& oldnode) {
+	bool isNew(ptrNode& newnode, ptrNode& oldnode) {
 		if (newnode->g_ > oldnode->g_) {
 			return false;
 		}
@@ -242,7 +242,7 @@ public:
 	}
 
 	/* 时间轴判断(是否为旧节点) */
-	bool IsOld(ptrNode& newnode, ptrNode& oldnode) {
+	bool isOld(ptrNode& newnode, ptrNode& oldnode) {
 		short equal = 0;
 		for (int i = 0; i < newnode->state_.size(); ++i) {
 			if (newnode->g_ - newnode->state_[i].v_ < oldnode->g_ - oldnode->state_[i].v_)
@@ -259,8 +259,8 @@ public:
 	}
 
 	/* 新旧节点判断 */
- 	std::pair<bool, list<ptrNode>*> IsNewNode(ptrNode newnode) {
-		auto str = newnode->to_string();
+ 	std::pair<bool, list<ptrNode>*> isNewNode(ptrNode newnode) {
+		auto str = newnode->toString();
 		if (entire_list_.count(str) <= 0) {
 			return std::make_pair(1, nullptr);
 		}
@@ -270,11 +270,11 @@ public:
 		for (auto itor = it->second.begin(); itor != it->second.end();) {
 			auto oldnode = *itor;
 			/* 判断新拓展出来节点的新旧性 */
-			if (IsNew(oldnode, newnode)) {
+			if (isSame(newnode, oldnode)) {
 				return std::make_pair(0, &(it->second));
 			}
 			/* 判断是否删除旧节点 */
-			if (IsNew(newnode, oldnode)) {
+			if (isSame(oldnode, newnode)) {
 				if (oldnode->sons_ == 0) {
 					for (auto f : oldnode->fathers) {
 						auto f_node = std::get<3>(f);
@@ -291,7 +291,7 @@ public:
 					}  // 在死锁节点表中删除oldnode
 
 					if (!oldnode->is_open_) {  // 只回收不在open表中的节点
-						pool_.Recycling(oldnode);
+						pool_.recycling(oldnode);
 					}
 					else oldnode->discarded_ = true;
 					itor = it->second.erase(itor);  // 从close表中删除
@@ -304,21 +304,21 @@ public:
 	}
 
 	/* 正向树 */
-	void ForwardTree() {
+	void forwardTree() {
 		std::cout << "\nBegin forward tree -> ";
 		clock_t start = clock();
 		while (!open_list_.empty()) {
 			auto curnode = open_list_.top();
 			open_list_.pop();
 			if (curnode->discarded_) { continue; }
-			auto enables = EnableTrans(curnode);
+			auto enables = enableTrans(curnode);
 			if (enables.empty()) {
 				curnode->is_deadlock_ = true;
 				deadlock_nodes_.emplace(curnode->id_, curnode);
 				continue;
 			}
 			for (auto t: enables) {
-				Fire(curnode, t); 
+				fire(curnode, t); 
 			}
 		}
 		clock_t end = clock();
@@ -327,7 +327,7 @@ public:
 	}
 
 	/* 反向树 */
-	void BackTree(){
+	void backTree(){
 		std::cout << "Begin back tree -> ";
 		clock_t start = clock();
 		vector<ptrNode> back_node = goal_nodes_;
@@ -360,7 +360,7 @@ public:
 	}
 
 	/* 死锁节点处理 */
-	void DeadLockNodeDeal() {
+	void deadLockNodeDeal() {
 		vector<ptrNode> back_nodes;
 
 		for (auto& obj: deadlock_nodes_) {

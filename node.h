@@ -41,8 +41,8 @@ public:
 	int maxNode;  // 最大节点数
 	std::queue<ptrNode> buf;    // 单端队列存储待利用节点
 	NodePool(int n = 10000000);
-	ptrNode GetNode();   // 获取节点；若buf为空，则拓展空间
-	void Recycling(ptrNode node);  // 回收旧节点，并初始化
+	ptrNode getNode();   // 获取节点；若buf为空，则拓展空间
+	void recycling(ptrNode node);  // 回收旧节点，并初始化
 private:
 	NodePool() = delete;
 };
@@ -91,7 +91,7 @@ public:
 
 	/* 标识计算 */
 	ptrNode operator+(const vector<int>& v) {
-		auto newnode = pool_->GetNode();
+		auto newnode = pool_->getNode();
 		int n = v.size();
 		int j = 0;  // 当前标识的某个库所
 		int i = 0;  // 处于关联矩阵的某个库所
@@ -163,7 +163,7 @@ public:
 	}
 
 	/* 标识转换为字符串 */
-	std::string to_string() {
+	std::string toString() {
 		std::string str;
 		for (auto p : state_) {
 			str.append(std::to_string(p.row_));

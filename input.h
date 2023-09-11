@@ -7,19 +7,19 @@
  *******************************************************/
 
 /* 任务量更改 */
-constexpr auto kInitMark = "./data/lj/122/m0.txt";
-constexpr auto kGoalMarking = "./data/lj/122/GoalMarking.txt";
+constexpr auto kInitMark = "./data/lj/123/m0.txt";
+constexpr auto kGoalMarking = "./data/lj/123/GoalMarking.txt";
 
 /* 数据集txt 可视化gv 信息info文件 */
-constexpr auto kOutputTxtPath = "./data/lj/122/Dataset.txt";
-constexpr auto kOutputGvPath = "./data/lj/122/Reachable_Graph.gv";
-constexpr auto kInfoPath = "./data/lj/122/Info.txt";
+constexpr auto kOutputTxtPath = "./data/g+h=1.5min(tra)/123/Dataset.txt";
+constexpr auto kOutputGvPath = "./data/g+h=1.5min(tra)/123/Reachable_Graph.gv";
+constexpr auto kInfoPath = "./data/g+h=1.5min(tra)/123/Info.txt";
 
 /* lyd 数据集csv文件 */
-constexpr auto kOutputCsvMPath = "./data/lj/122/m.csv";
-constexpr auto kOutputCsvXPath = "./data/lj/122/x.csv";
-constexpr auto kOutputCsvHPath = "./data/lj/122/h.csv";
-constexpr auto kOutputCsvQPath = "./data/lj/122/Q.csv";
+constexpr auto kOutputCsvMPath = "./data/lj/222/m.csv";
+constexpr auto kOutputCsvXPath = "./data/lj/222/x.csv";
+constexpr auto kOutputCsvHPath = "./data/lj/222/h.csv";
+constexpr auto kOutputCsvQPath = "./data/lj/222/Q.csv";
 
 /* 无需更改 */
 constexpr auto kPrePath = "./data/lj/Basic/pre.txt";
@@ -27,12 +27,12 @@ constexpr auto kPostPath = "./data/lj/Basic/post.txt";
 constexpr auto kTimePath = "./data/lj/Basic/delay.txt";
 constexpr auto kGoalPlace = "./data/lj/Basic/GoalPlace.txt";
 
-//constexpr auto M0_path = "./data/lzx/M0.txt";
-//constexpr auto GoalMarking = "./data/lzx/GoalMarking.txt";
-//constexpr auto Pre_path = "./data/lzx/Pre.txt";
-//constexpr auto Post_path = "./data/lzx/Post.txt";
-//constexpr auto Time_path = "./data/lzx/delays.txt";
-//constexpr auto GoalPlace = "./data/lzx/GoalPlace.txt";
+//constexpr auto kInitMark = "./data/lzx/M0.txt";
+//constexpr auto kGoalMarking = "./data/lzx/GoalMarking.txt";
+//constexpr auto kPrePath = "./data/lzx/Pre.txt";
+//constexpr auto kPostPath = "./data/lzx/Post.txt";
+//constexpr auto kTimePath = "./data/lzx/delays.txt";
+//constexpr auto kGoalPlace = "./data/lzx/GoalPlace.txt";
 
 #include <iostream>
 #include <fstream>
@@ -40,9 +40,9 @@ constexpr auto kGoalPlace = "./data/lj/Basic/GoalPlace.txt";
 #include <string>
 
 using std::vector;
-template<class T> 
+template<class T>
 /* 读取初始标识、延时 */
-vector<T> ReadVector(const char* path) {
+vector<T> readVector(const char* path) {
 	T num;
 	vector<T> result;
 	std::ifstream file(path);
@@ -57,7 +57,7 @@ vector<T> ReadVector(const char* path) {
 }
 
 /* 读取关联矩阵 */
-vector<vector<int>> ReadMatrix(const char* path, int m)
+vector<vector<int>> readMatrix(const char* path, int m)
 {
 	vector<vector<int>> matrix;
 	std::ifstream file(path, std::ios::in);
@@ -80,7 +80,7 @@ vector<vector<int>> ReadMatrix(const char* path, int m)
 }
 
 /* 获取目标节点标识 */
-vector<int> GetGoalMark(vector<int>& goalMarking, vector<int>& goalPlace, int nums) {
+vector<int> getGoalMark(vector<int>& goalMarking, vector<int>& goalPlace, int nums) {
 	vector<int> ans(nums, 0);
 	if (goalMarking.size() != goalPlace.size()){
 		std::cout << "The dimension of goal marking and goal place is not consistent!" << std::endl;

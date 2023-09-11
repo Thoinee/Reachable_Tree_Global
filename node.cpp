@@ -13,7 +13,7 @@ NodePool::NodePool(int n) {
 }
 
 /* 取节点(头取法) */
-ptrNode NodePool::GetNode() {
+ptrNode NodePool::getNode() {
 	if (buf.empty()) {
 		maxNode += 1000;
 		for (int i = 0; i < 1000; ++i) {
@@ -27,7 +27,7 @@ ptrNode NodePool::GetNode() {
 }
 
 /* 回收节点(置于初始状态，尾插入节点池) */
-void NodePool::Recycling(ptrNode node) {
+void NodePool::recycling(ptrNode node) {
 	node->id_ = Node::num++;
 	node->discarded_ = true;
 	node->g_ = 0;
