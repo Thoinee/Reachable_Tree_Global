@@ -16,11 +16,11 @@ int main(int argc, char* argv[]){
 	/* 读数据 */
 	std::vector<int> m0 = readVector<int>(kInitMark);
 	std::vector<int> d0 = readVector<int>(kTimePath);
-	std::vector<vector<int>> pre = readMatrix(kPrePath, m0.size());
-	std::vector<vector<int>> post = readMatrix(kPostPath, m0.size());
 	std::vector<int> goals = readVector<int>(kGoalPlace);
 	std::vector<int> goal_marking = readVector<int>(kGoalMarking);
 	std::vector<int> goal_vector = getGoalMark(goal_marking, goals, m0.size());
+	std::vector<vector<int>> pre = readMatrix(kPrePath, m0.size());
+	std::vector<vector<int>> post = readMatrix(kPostPath, m0.size());
 
 	/* 正向树与反向树 */
 	PetriNet petri(m0, d0, pre, post, goal_vector, 1);
