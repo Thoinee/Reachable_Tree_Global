@@ -184,8 +184,7 @@ public:
 			entire_list_.emplace(str, std::move(temp));
 			open_list_.push(newnode);
 			newnode->is_open_ = true;
-		}
-		else {  
+		} else {  
 			/* 不是新节点，回收 */
 			if (!pair.first) {
 				if ((--curnode->sons_) == 0)
@@ -252,8 +251,10 @@ public:
 			}
 		}
 		if (equal == oldnode->state_.size()) {
-			oldnode->fathers.push_back(newnode->fathers[0]);
-			std::get<3>(newnode->fathers[0])->sons_++;
+			for (auto f : oldnode->fathers) {
+				newnode->fathers.push_back(f);
+				std::get<3>(f)->sons_++;
+			}
 		}
 		return true;
 	}
