@@ -22,14 +22,14 @@ typedef unordered_map<string, string> Mymap;
 typedef unsigned int Uint;
 typedef std::shared_ptr<Mymap> MymapPtr;
 
-//static const vector<string> dataset = { "001", "010", "011", "100", "101", "110", "111", 
-//										"112", "121", "122", "211", "212", "221", "222",
-//										"223", "232", "233", "322", "323", "332", "333"};  // 指定待融合数据集文件
+//static const vector<string> dataset = { "001", "010", "011", "100", "101", "110", "111"/*, 
+//										"112", "211", "121", "122", "212", "221", "113",
+//										"131", "311"*/};  // 指定待融合数据集文件
 
-static const vector<string> dataset = { "111_"/*, "011"*/ };  // 指定待融合数据集文件
+static const vector<string> dataset = { "111", "211", "112", "121", "212" };  // 指定待融合数据集文件
 
 /** 数据去重 */
-MymapPtr Deduplication(const string folder_path)
+MymapPtr deduplication(const string folder_path)
 {
 	MymapPtr data = std::make_shared<Mymap>();  // 存放数据
 	Uint diff = 0;  // 异同的数据量
@@ -59,13 +59,14 @@ MymapPtr Deduplication(const string folder_path)
 			// key值相同 保留h值小的元素
 			if (data->find(key) != data->end()) {
 				auto h = data->find(key)->second;  // 获取h值
-				/*if (std::stof(val) == std::stof(h)) {
+				if (std::stof(val) != std::stof(h)) {
+					std::cout << std::stof(val) << " " << std::stof(h) << '\n';
 					same++;
-				}*/
+				}
 				if (std::stof(val) < std::stof(h)) {
 					data->at(key) = val;
 				}
-				same++;
+				/*same++;*/
 				continue;
 			}
 			// 异同
@@ -83,7 +84,7 @@ MymapPtr Deduplication(const string folder_path)
 }
 
 /** 去除尾部空格 */
-void ExportFinalData(MymapPtr lib, const char* path)
+void exportFinalData(MymapPtr lib, const char* path)
 {
 	int pos = 0;  // 当前数据索引
 
