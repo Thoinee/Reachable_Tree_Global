@@ -382,7 +382,7 @@ void dataCreateCsv(PetriNet& tree, const int num_place, const int num_transition
 
 	bool begin = true; // 每条数据之间的换行符
 	for (auto node: total_nodes) {
-		if (node->h_ > 9999 || node->h_ + node->g_ >= threshold_value) 
+		if (node->h_ > 9999 || node->h_ + node->g_ > threshold_value) 
 			continue;
 		if (!begin) {
 			file_m << '\n';

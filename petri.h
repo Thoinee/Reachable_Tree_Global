@@ -251,8 +251,8 @@ public:
 			}
 		}
 		if (equal == oldnode->state_.size()) {
-			for (auto f : oldnode->fathers) {
-				newnode->fathers.push_back(f);
+			for (auto f : newnode->fathers) {
+				oldnode->fathers.push_back(f);
 				std::get<3>(f)->sons_++;
 			}
 		}
