@@ -7,25 +7,33 @@
  *******************************************************/
 
 /* 任务量更改 */
-constexpr auto kInitMark = "./data/lj/123/m0.txt";
-constexpr auto kGoalMarking = "./data/lj/123/GoalMarking.txt";
+constexpr auto kInitMark = "./data/lj/111/m0.txt";
+constexpr auto kGoalMarking = "./data/lj/111/GoalMarking.txt";
 
 /* 数据集txt 可视化gv 信息info文件 */
-constexpr auto kOutputTxtPath = "./data/g+h=1.5min(tra)/123/Dataset.txt";
-constexpr auto kOutputGvPath = "./data/g+h=1.5min(tra)/123/Reachable_Graph.gv";
-constexpr auto kInfoPath = "./data/g+h=1.5min(tra)/123/Info.txt";
+constexpr auto kOutputTxtPath = "./data/lj/111/Dataset.txt";
+constexpr auto kOutputGvPath = "./data/lj/111/Reachable_Graph.gv";
+constexpr auto kInfoPath = "./data/lj/111/Info.txt";
 
 /* lyd 数据集csv文件 */
-constexpr auto kOutputCsvMPath = "./data/lj/222/m.csv";
-constexpr auto kOutputCsvXPath = "./data/lj/222/x.csv";
-constexpr auto kOutputCsvHPath = "./data/lj/222/h.csv";
-constexpr auto kOutputCsvQPath = "./data/lj/222/Q.csv";
+constexpr auto kOutputCsvMPath = "./data/lj/111/m.csv";
+constexpr auto kOutputCsvXPath = "./data/lj/111/x.csv";
+constexpr auto kOutputCsvHPath = "./data/lj/111/h.csv";
+constexpr auto kOutputCsvQPath = "./data/lj/111/Q.csv";
 
 /* 无需更改 */
 constexpr auto kPrePath = "./data/lj/Basic/pre.txt";
 constexpr auto kPostPath = "./data/lj/Basic/post.txt";
 constexpr auto kTimePath = "./data/lj/Basic/delay.txt";
 constexpr auto kGoalPlace = "./data/lj/Basic/GoalPlace.txt";
+
+//constexpr auto kInitMark = "./data/zjz/m0.txt";
+//constexpr auto kOutputGvPath = "./data/zjz/Reachable_Graph.gv";
+//constexpr auto kGoalMarking = "./data/zjz/GoalMarking.txt";
+//constexpr auto kPrePath = "./data/zjz/pre.txt";
+//constexpr auto kPostPath = "./data/zjz/post.txt";
+//constexpr auto kTimePath = "./data/zjz/delay.txt";
+//constexpr auto kGoalPlace = "./data/zjz/GoalPlace.txt";
 
 //constexpr auto kInitMark = "./data/lzx/M0.txt";
 //constexpr auto kGoalMarking = "./data/lzx/GoalMarking.txt";

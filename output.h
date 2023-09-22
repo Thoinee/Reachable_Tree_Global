@@ -415,6 +415,7 @@ void dataCreateCsv(PetriNet& tree, const int num_place, const int num_transition
 			file_x << v;
 		}
 
+		/* ´æÈëQ */
 		begin_in = true;
 		for (auto v: Q_value) {
 			if (!begin_in) {
