@@ -271,11 +271,11 @@ public:
 		for (auto itor = it->second.begin(); itor != it->second.end();) {
 			auto oldnode = *itor;
 			/* 判断新拓展出来节点的新旧性 */
-			if (isSame(newnode, oldnode)) {
+			if (isNew(oldnode, newnode)) {
 				return std::make_pair(0, &(it->second));
 			}
 			/* 判断是否删除旧节点 */
-			if (isSame(oldnode, newnode)) {
+			if (isNew(newnode, oldnode)) {
 				if (oldnode->sons_ == 0) {
 					for (auto f : oldnode->fathers) {
 						auto f_node = std::get<3>(f);
