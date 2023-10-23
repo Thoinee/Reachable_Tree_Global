@@ -267,15 +267,15 @@ public:
 		}
 		auto it = entire_list_.find(str);
 
-		/* 先 g 后 v */
+		/* 与链表上的每个节点依次进行比较 */
 		for (auto itor = it->second.begin(); itor != it->second.end();) {
 			auto oldnode = *itor;
 			/* 判断新拓展出来节点的新旧性 */
-			if (isNew(oldnode, newnode)) {
+			if (isSame(newnode, oldnode)) {
 				return std::make_pair(0, &(it->second));
 			}
 			/* 判断是否删除旧节点 */
-			if (isNew(newnode, oldnode)) {
+			if (isSame(oldnode, newnode)) {
 				if (oldnode->sons_ == 0) {
 					for (auto f : oldnode->fathers) {
 						auto f_node = std::get<3>(f);

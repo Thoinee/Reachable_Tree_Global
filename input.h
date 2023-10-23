@@ -6,14 +6,14 @@
  * @Update   ：2023/07/18 11:30
  *******************************************************/
 
-/* 任务量更改 */
+/* 任务量更改 */  
 constexpr auto kInitMark = "./data/lj/111/m0.txt";
 constexpr auto kGoalMarking = "./data/lj/111/GoalMarking.txt";
 
 /* 数据集txt 可视化gv 信息info文件 */
-constexpr auto kOutputTxtPath = "./data/lj/111/Dataset.txt";
-constexpr auto kOutputGvPath = "./data/lj/111/Reachable_Graph.gv";
-constexpr auto kInfoPath = "./data/lj/111/Info.txt";
+constexpr auto kOutputTxtPath = "./data/g+h=min/111/Dataset.txt";
+constexpr auto kOutputGvPath = "./data/g+h=min/111/Reachable_Graph.gv";
+constexpr auto kInfoPath = "./data/g+h=min/111/Info.txt";
 
 /* lyd 数据集csv文件 */
 constexpr auto kOutputCsvMPath = "./data/lj/111/m.csv";
@@ -65,8 +65,7 @@ vector<T> readVector(const char* path) {
 }
 
 /* 读取关联矩阵 */
-vector<vector<int>> readMatrix(const char* path, int m)
-{
+vector<vector<int>> readMatrix(const char* path, int m) {
 	vector<vector<int>> matrix;
 	std::ifstream file(path, std::ios::in);
 	if (!file.is_open()) {

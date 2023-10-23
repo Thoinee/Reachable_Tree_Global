@@ -12,7 +12,7 @@
 #include "petri.h"
 #include "output.h"
 
-int main(int argc, char* argv[]){
+int main(int argc, char* argv[]) {
 	/* ¶ÁÊý¾Ý */
 	std::vector<int> m0 = readVector<int>(kInitMark);
 	std::vector<int> d0 = readVector<int>(kTimePath);

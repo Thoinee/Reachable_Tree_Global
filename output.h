@@ -11,7 +11,6 @@
 #include <unordered_set>
 #include <string>
 #include <queue>
-#include <unordered_set>
 #include <iomanip>
 #include <mutex>
 #include "petri.h"
@@ -23,7 +22,7 @@ static std::mutex mtx;
 static std::unordered_set<int> ignore_m = { 12, 18, 34 }; // 省略目标库所
 static std::unordered_set<int> ignore_v = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17, 18, 33, 34 }; // 省略初始库所、资源库所、目标库所
 
-static float max_accept_multiple = 999; // 可容许最大倍数
+static float max_accept_multiple = 1; // 可容许最大倍数
 
 /* 节点计数器 */
 static long tree_nodes_num = 0;  // 状态数
@@ -331,7 +330,7 @@ void dataCreateTxt(PetriNet& tree, const int num_place) {
 			file << v << '\t';
 		}
 		file << node->h_;
-		total_nodes_num++;
+		++total_nodes_num;
 	}
 
 	for (auto nodes: tree.entire_list_) {
@@ -348,7 +347,7 @@ void dataCreateTxt(PetriNet& tree, const int num_place) {
 				file << v << '\t';
 			}
 			file << node->h_;
-			total_nodes_num++;
+			++total_nodes_num;
 		}
 	}
 

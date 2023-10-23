@@ -31,7 +31,7 @@ public:
 	int8_t tokens_;
 	int8_t row_;
 	int16_t v_;
-	//nums of tokens, id of place , waiting time of place
+	// nums of tokens, id of place , waiting time of place
 	Place(int8_t t, int8_t r, int16_t v) :tokens_(t), row_(r), v_(v) {};
 };
 
